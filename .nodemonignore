@@ -1,0 +1,11 @@
+# package control
+./node_modules/*
+
+# build artifacts
+./bin/*
+
+# ignore client-side js
+./src/client/*
+
+# ignore tests
+./test/*

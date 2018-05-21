@@ -16,6 +16,21 @@ module.exports = function (grunt) {
             destCSS: 'build/css/icons.css'
           }
         },
+        jade: {
+          debug: {
+            options: {
+              pretty: true
+            },
+            files: {
+              'build/views/home.html': 'public/views/home.jade'
+            }
+          },
+          release: {
+            files: {
+              'build/views/home.html': 'public/views/home.jade'
+            }
+          }
+        },
         uglify: {
           bundle: {
             files: {
@@ -36,9 +51,15 @@ module.exports = function (grunt) {
           }
         },
         less: {
-          compile: {
+          debug: {
             files: {
-              'build/css/compiled.css' : 'public/css/**/*.less'
+              'build/css/layout.css' : 'public/css/layout.less',
+              'build/css/home.css' : 'public/css/home.less'
+            }
+          },
+          release: { 
+            files: {
+                'build/css/all.css': ['public/css/**/*.less']
             }
           }
         },
@@ -47,7 +68,25 @@ module.exports = function (grunt) {
             'public/js/**/*.js',
             '!public/js/vendor',
             'Gruntfile.js'
-          ]
+          ],
+          server: ['server/**/*.js'],
+          support: ['Gruntfile.js']
+        },
+        watch: { // TODO: This should be fixed to only re-build what was changed
+          rebuild: {
+            tasks: ['build:debug'],
+            files: ['public/**/*']
+          }
+        },
+        nodemon: {
+          dev: {
+            script: 'app.js'
+          }
+        },
+        concurrent: {
+          dev: {
+            tasks: ['nodemon', 'watch']
+          }
         }
     });
     grunt.loadNpmTasks('grunt-contrib-jshint');
@@ -55,6 +94,9 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-spritesmith');
+    grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-concurrent');
+    grunt.loadNpmTasks('grunt-nodemon');
     grunt.registerTask('default', ['jshint']); // register a default task alias
     grunt.registerTask('js', 'Concatenate and minify static JavaScript assets',
       ['concat:js', 'uglify:bundle']);
@@ -67,4 +109,6 @@ module.exports = function (grunt) {
 
       grunt.file.write(options.file, contents);
     });
+    grunt.registerTask('build:debug', ['jshint', 'less:debug', 'jade:debug']);
+    grunt.registerTask('build:release', ['jshint', 'less:release', 'jade:release']);
 };
