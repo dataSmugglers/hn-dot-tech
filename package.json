@@ -12,7 +12,13 @@
     "type": "git",
     "url": "git://github.com/dataSmugglers/hn-dot-tech"
   },
+  "scripts": {
+    "start": "node ./bin/www"
+  },
   "devDependencies": {
+    "cookie-parser": "^1.4.3",
+    "debug": "^3.1.0",
+    "express": "^4.16.3",
     "grunt": "~0.4.5",
     "grunt-concurrent": "^2.3.1",
     "grunt-contrib-concat": "^1.0.1",
@@ -21,6 +27,11 @@
     "grunt-contrib-uglify": "^3.3.0",
     "grunt-contrib-watch": "^1.1.0",
     "grunt-nodemon": "^0.4.2",
-    "grunt-spritesmith": "^6.6.0"
-  }
+    "grunt-spritesmith": "^6.6.0",
+    "http-errors": "^1.6.3",
+    "less-middleware": "^3.0.0",
+    "morgan": "^1.9.0",
+    "pug": "^2.0.3"
+  },
+  "dependencies": {}
 }

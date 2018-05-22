@@ -73,6 +73,15 @@ module.exports = function (grunt) {
           support: ['Gruntfile.js']
         },
         watch: { // TODO: This should be fixed to only re-build what was changed
+          livereload: {
+            options: {
+              livereload: true
+            },
+            files: [
+              'public/**/*.{css,js}',
+              'views/**/*.html'
+            ]
+          },
           rebuild: {
             tasks: ['build:debug'],
             files: ['public/**/*']
