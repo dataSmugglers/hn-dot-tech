@@ -5,6 +5,8 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var lessMiddleware = require('less-middleware');
 var logger = require('morgan');
+var mongo = require('mongodb');
+
 
 //TODO: need to add: morgan, cookie-parser, less-middleware, http-errors
 
