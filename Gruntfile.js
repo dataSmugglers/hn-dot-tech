@@ -1,13 +1,9 @@
+'use strict'
+
 module.exports = function (grunt) {
     grunt.initConfig({
-        timestamp: {
-          options: {
-            file: 'your/file/path'
-          }
-        },
         clean: {
-          js: 'build/js',
-          css: 'build/css',
+          build: 'build',
         },
         sprite: {
           icons: {
@@ -16,18 +12,18 @@ module.exports = function (grunt) {
             destCSS: 'build/css/icons.css'
           }
         },
-        jade: {
+        pug: {
           debug: {
             options: {
               pretty: true
             },
             files: {
-              'build/views/home.html': 'public/views/home.jade'
+              'build/views/index.html': 'public/views/index.pug'
             }
           },
           release: {
             files: {
-              'build/views/home.html': 'public/views/home.jade'
+              'build/views/index.html': 'public/views/index.pug'
             }
           }
         },
@@ -64,13 +60,38 @@ module.exports = function (grunt) {
           }
         },
         jshint: {
-          client: [
-            'public/js/**/*.js',
+          client: {
+            src: [
+            'public/javascript/**/*.js',
             '!public/js/vendor',
-            'Gruntfile.js'
-          ],
-          server: ['server/**/*.js'],
-          support: ['Gruntfile.js']
+            'Gruntfile.js',
+            'controllers/**/*.js',
+            'models/**/*.js',
+            'routes/**/*.js',
+            ],
+            options: {
+              jshintrc: 'public/.jshintrc'
+            }
+
+          },
+          server: {
+            src: [
+            'server/**/*.js',
+            'app.js',
+            'www/**/*.js',
+            ],
+            options: {
+              jshintrc: 'public/.jshintrc'
+            }
+          },
+          build: {
+            src: {
+              ['Gruntfile.js']
+            },
+            options: {
+              jshintrc: 'public/.jshintrc'
+            }
+          }
         },
         watch: { // TODO: This should be fixed to only re-build what was changed
           livereload: {
@@ -82,9 +103,29 @@ module.exports = function (grunt) {
               'views/**/*.html'
             ]
           },
+          js: {
+            // TODO: Why does GM copy files after linting?
+            files: 
+            [
+              'public/js/**/*.js', 'controllers/**/*.js',
+              'models/**/*.js', 'routes/**/*.js'
+            ],
+            tasks: ['jshint:client']
+          },
+          lint_server: {
+            files: ['app.js', 'bin/www.js'],
+            tasks: ['jshint:server']
+          },
+          less: {
+            files: ['public/css/**/*.less'],
+            tasks: ['less:debug']
+          },
+
+          // TODO: add Grunt task for pug!
+          
           rebuild: {
-            tasks: ['build:debug'],
-            files: ['public/**/*']
+            files: ['Gruntfile.js'],
+            tasks: ['jshint:build', 'build:debug'],
           }
         },
         nodemon: {
@@ -94,7 +135,9 @@ module.exports = function (grunt) {
         },
         concurrent: {
           dev: {
-            tasks: ['nodemon', 'watch']
+            tasks: ['nodemon', 'watch'],
+            options: {
+            }
           }
         }
     });
@@ -106,6 +149,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-concurrent');
     grunt.loadNpmTasks('grunt-nodemon');
+    grunt.loadNpmTasks('grunt-contrib-pug');
     grunt.registerTask('default', ['jshint']); // register a default task alias
     grunt.registerTask('js', 'Concatenate and minify static JavaScript assets',
       ['concat:js', 'uglify:bundle']);
@@ -118,6 +162,6 @@ module.exports = function (grunt) {
 
       grunt.file.write(options.file, contents);
     });
-    grunt.registerTask('build:debug', ['jshint', 'less:debug', 'jade:debug']);
-    grunt.registerTask('build:release', ['jshint', 'less:release', 'jade:release']);
+    grunt.registerTask('build:debug', ['jshint', 'less:debug', 'pug:debug']);
+    grunt.registerTask('build:release', ['jshint', 'less:release', 'pug:release']);
 };
