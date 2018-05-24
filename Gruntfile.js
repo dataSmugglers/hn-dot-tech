@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 module.exports = function (grunt) {
     grunt.initConfig({
@@ -54,6 +54,9 @@ module.exports = function (grunt) {
             }
           },
           release: { 
+            options: {
+              yuicompress: true
+            },
             files: {
                 'build/css/all.css': ['public/css/**/*.less']
             }
@@ -62,15 +65,11 @@ module.exports = function (grunt) {
         jshint: {
           client: {
             src: [
-            'public/javascript/**/*.js',
-            '!public/js/vendor',
-            'Gruntfile.js',
-            'controllers/**/*.js',
-            'models/**/*.js',
-            'routes/**/*.js',
+            './public/javascripts/**/*.js',
             ],
             options: {
-              jshintrc: 'public/.jshintrc'
+              jshintrc: 'public/.jshintrc',
+              reporterOutput: ''
             }
 
           },
@@ -81,15 +80,15 @@ module.exports = function (grunt) {
             'www/**/*.js',
             ],
             options: {
-              jshintrc: 'public/.jshintrc'
+              jshintrc: '.jshintrc',
+              reporterOutput: ''
             }
           },
           build: {
-            src: {
-              ['Gruntfile.js']
-            },
+            src: ['Gruntfile.js'],
             options: {
-              jshintrc: 'public/.jshintrc'
+              jshintrc: '.jshintrc',
+              reporterOutput: ''
             }
           }
         },
@@ -104,16 +103,13 @@ module.exports = function (grunt) {
             ]
           },
           js: {
-            // TODO: Why does GM copy files after linting?
-            files: 
-            [
-              'public/js/**/*.js', 'controllers/**/*.js',
-              'models/**/*.js', 'routes/**/*.js'
-            ],
+            // TODO: Why does author copy files after linting?
+            files: [ 'public/js/**/*.js'],
             tasks: ['jshint:client']
           },
           lint_server: {
-            files: ['app.js', 'bin/www.js'],
+            files: ['app.js', 'bin/www', 'server/**/*.js'
+            ],
             tasks: ['jshint:server']
           },
           less: {
@@ -130,18 +126,20 @@ module.exports = function (grunt) {
         },
         nodemon: {
           dev: {
-            script: 'app.js'
+            script: 'bin/www'
           }
         },
         concurrent: {
           dev: {
             tasks: ['nodemon', 'watch'],
             options: {
+              logConcurrentOutput: true
             }
           }
         }
     });
     grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-concat');
@@ -162,6 +160,8 @@ module.exports = function (grunt) {
 
       grunt.file.write(options.file, contents);
     });
-    grunt.registerTask('build:debug', ['jshint', 'less:debug', 'pug:debug']);
+    // TODO: See if we need a build task for pug
+    grunt.registerTask('build:debug', "Lint and Compile", ['clean', 'jshint', 'less:debug' ]);
     grunt.registerTask('build:release', ['jshint', 'less:release', 'pug:release']);
+    grunt.registerTask('dev', ['build:debug', 'concurrent']);
 };

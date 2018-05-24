@@ -11,7 +11,7 @@ var mongoose = require('mongoose');
 //TODO: need to add: morgan, cookie-parser, less-middleware, http-errors
 
 // Routes
-var indexRouter = require('./routes/index');
+var indexRouter = require('./server/routes/index');
 
 // Application
 var app = express();
