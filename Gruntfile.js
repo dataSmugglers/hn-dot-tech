@@ -46,22 +46,6 @@ module.exports = function (grunt) {
             }
           }
         },
-        less: {
-          debug: {
-            files: {
-              'build/css/layout.css' : 'public/css/layout.less',
-              'build/css/home.css' : 'public/css/home.less'
-            }
-          },
-          release: { 
-            options: {
-              yuicompress: true
-            },
-            files: {
-                'build/css/all.css': ['public/css/**/*.less']
-            }
-          }
-        },
         jshint: {
           client: {
             src: [
@@ -112,21 +96,25 @@ module.exports = function (grunt) {
             ],
             tasks: ['jshint:server']
           },
-          less: {
-            files: ['public/css/**/*.less'],
-            tasks: ['less:debug']
-          },
-
-          // TODO: add Grunt task for pug!
-          
           rebuild: {
             files: ['Gruntfile.js'],
             tasks: ['jshint:build', 'build:debug'],
           }
         },
+        copy: {
+          js_debug: {
+            expand: true,
+            cwd: 'public/javascripts',
+            src: '**/*.js',
+            dest: 'build/javascripts/'
+          }
+        },
         nodemon: {
           dev: {
-            script: 'bin/www'
+            script: 'bin/www',
+            env: {
+              DEBUG: 'hn-dot-tech:*'
+            }
           }
         },
         concurrent: {
@@ -140,6 +128,7 @@ module.exports = function (grunt) {
     });
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-concat');
@@ -161,7 +150,7 @@ module.exports = function (grunt) {
       grunt.file.write(options.file, contents);
     });
     // TODO: See if we need a build task for pug
-    grunt.registerTask('build:debug', "Lint and Compile", ['clean', 'jshint', 'less:debug' ]);
+    grunt.registerTask('build:debug', "Lint and Compile", ['jshint']);
     grunt.registerTask('build:release', ['jshint', 'less:release', 'pug:release']);
     grunt.registerTask('dev', ['build:debug', 'concurrent']);
 };
