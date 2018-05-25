@@ -30,6 +30,7 @@
     "grunt-contrib-pug": "^1.0.0",
     "grunt-contrib-uglify": "^3.3.0",
     "grunt-contrib-watch": "^1.1.0",
+    "grunt-conventional-changelog": "^6.1.0",
     "grunt-nodemon": "^0.4.2",
     "grunt-rev": "^0.1.0",
     "grunt-spritesmith": "^6.6.0",

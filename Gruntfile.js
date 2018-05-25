@@ -5,6 +5,14 @@ module.exports = function (grunt) {
         clean: {
           build: 'build',
         },
+        bump: {
+          options: {
+            commit: true,
+            createTag: true,
+            push: true,
+            pushTo: 'origin'
+          }
+        },
         sprite: {
           icons: {
             src: 'public/img/icons/*.png',
@@ -83,7 +91,7 @@ module.exports = function (grunt) {
             },
             files: [
               'public/**/*.{css,js}',
-              'views/**/*.html'
+              'views/**/*.{html,pug}'
             ]
           },
           js: {
@@ -126,6 +134,7 @@ module.exports = function (grunt) {
           }
         }
     });
+    grunt.loadNpmTasks('grunt-bump');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-copy');
@@ -135,6 +144,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-spritesmith');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-concurrent');
+    grunt.loadNpmTasks('grunt-conventional-changelog');
     grunt.loadNpmTasks('grunt-nodemon');
     grunt.loadNpmTasks('grunt-contrib-pug');
     grunt.registerTask('default', ['jshint']); // register a default task alias
