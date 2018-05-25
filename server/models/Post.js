@@ -10,4 +10,4 @@ var postSchema = mongoose.Schema({
     finalTimeAsTop: Number
 });
 
-var Post = mongoose.model('Post', postSchema);
+module.exports = mongoose.model('Post', postSchema);
