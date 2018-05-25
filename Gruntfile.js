@@ -18,12 +18,6 @@ module.exports = function (grunt) {
             pushTo: 'origin'
           }
         },
-        conventionalChangelog: {
-          options: {
-            editor: 'vim',
-            github: 'git://github.com/dataSmugglers/hn-dot-tech.git'
-          }
-        },
         sprite: {
           icons: {
             src: 'public/img/icons/*.png',
@@ -174,5 +168,5 @@ module.exports = function (grunt) {
     grunt.registerTask('build:debug', "Lint and Compile", ['jshint']);
     grunt.registerTask('build:release', ['jshint', 'less:release', 'pug:release']);
     grunt.registerTask('dev', ['build:debug', 'concurrent']);
-    grunt.registerTask('notes', ['bump-only', 'conventionalChangelog', 'bump-commit']);
+    //grunt.registerTask('notes', ['bump-only', 'conventionalChangelog', 'bump-commit']);
 };
