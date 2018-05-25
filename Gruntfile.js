@@ -5,12 +5,23 @@ module.exports = function (grunt) {
         clean: {
           build: 'build',
         },
+        // used by the changelog task
+        pkg: grunt.file.readJSON('package.json'),
+
         bump: {
           options: {
-            commit: true,
-            createTag: true,
-            push: true,
+            updateConfigs: ['pkg'],
+            commitFiles: ['package.json', 'CHANGELOG.md'],
+            //commit: true,
+            //createTag: true,
+            //push: true,
             pushTo: 'origin'
+          }
+        },
+        changelog: {
+          options: {
+            editor: 'vim',
+            github: 'git://github.com/dataSmugglers/hn-dot-tech.git'
           }
         },
         sprite: {
@@ -163,4 +174,5 @@ module.exports = function (grunt) {
     grunt.registerTask('build:debug', "Lint and Compile", ['jshint']);
     grunt.registerTask('build:release', ['jshint', 'less:release', 'pug:release']);
     grunt.registerTask('dev', ['build:debug', 'concurrent']);
+    grunt.registerTask('notes', ['bump-only', 'changelog']);
 };

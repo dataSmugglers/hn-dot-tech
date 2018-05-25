@@ -1,6 +1,6 @@
 {
   "name": "hn-dot-tech",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "homepage": "https://github.com/dataSmugglers/hn-dot-tech",
   "author": {
     "name": "hexphase/Sal Camera",
@@ -10,7 +10,7 @@
   "license": "BSD 3-Clause",
   "repository": {
     "type": "git",
-    "url": "git://github.com/dataSmugglers/hn-dot-tech"
+    "url": "git://github.com/dataSmugglers/hn-dot-tech.git"
   },
   "scripts": {
     "start": "node ./bin/www"
