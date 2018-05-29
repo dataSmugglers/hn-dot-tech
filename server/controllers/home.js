@@ -1,5 +1,4 @@
 'use strict';
-'use esversion: 6';
 
 var Post = require('../models/Post');
 var mongoose = require('mongoose');
@@ -14,10 +13,10 @@ function home (req, res) {
 
     var myData = new Post();
 
-    myData.save().catch(err => {
+/*    myData.save().catch(err => {
 	res.status(400).send("400 eerrrr");
     });
-    
+*/    
     var topPostId = hn.getTopStories(1);
     var topPost = hn.getItem(topPostId[0]);
     var string = JSON.stringify(topPost);
