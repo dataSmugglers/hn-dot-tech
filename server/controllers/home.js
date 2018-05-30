@@ -12,14 +12,9 @@ function home (req, res) {
     mongoose.connect(url);
 
     var myData = new Post();
-
-/*    myData.save().catch(err => {
-	res.status(400).send("400 eerrrr");
+    Post.find({}, function (err, posts) {
+      if (err) return res.status(400).send(err);
+      res.render('index', {title: posts});
     });
-*/    
-    var topPostId = hn.getTopStories(1);
-    var topPost = hn.getItem(topPostId[0]);
-    var string = JSON.stringify(topPost);
-    res.render('index',  { title: string });
 }
 
