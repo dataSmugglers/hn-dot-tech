@@ -31,37 +31,34 @@ const sleep = require('util').promisify(setTimeout);
 
 async function main() {
     console.log('in main');
-  var goOn = true;
+    var goOn = true;
 
     while(goOn) {
 	console.log('in while');
-  // Connect to DB
-     mongoose.connect(url);
-     var db = mongoose.connection;
-     db.on('error', console.error.bind(console, 'connection error:'));
-     db.once('open', function() {
-	 console.log('db is open');
-     var topPostId = hn.getTopStories();
+  	// Connect to DB
+        mongoose.connect(url);
+     	var db = mongoose.connection;
+     	db.on('error', console.error.bind(console, 'connection error:'));
+     	db.once('open', function() {
+        console.log('db is open');
+     	var topPostId = hn.getTopStories();
 
-     console.log(topPostId);
-     console.log(topPostId[0]);
-     var firstTopPost = hn.getItem(topPostId[0]);
-     console.log(firstTopPost);
-     console.log(firstTopPost.title);
-     Post.find({hnid: topPostId}, postSave(err, posts, firstTopPost));
-     });
-     await sleep(3000);
-   }
-}
-      
-function postSave(err, posts, firstTopPost){
-    if(err) return console.log(err);
-	var myData = new Post({hnid: firstTopPost.id, title: firstTopPost.title, url: firstTopPost.url, votes: firstTopPost.score});
-	myData.save().catch(err => {
-	    console.log(err);
-	});
-	console.log('successful save');
-        
+     	console.log(topPostId);
+     	console.log(topPostId[0]);
+     	var firstTopPost = hn.getItem(topPostId[0]);
+     	console.log(firstTopPost);
+     	console.log(firstTopPost.title);
+     	Post.find({hnid: topPostId}, function(err, posts){
+            if(err) return console.log(err);
+            var myData = new Post({hnid: firstTopPost.id, title: firstTopPost.title, url: firstTopPost.url, votes: firstTopPost.score});
+	        myData.save().catch(err => {
+	        console.log(err);
+	        });
+	        console.log('successful save');
+        });
+        });
+        await sleep(3000);
+    }
 }
 
 main();
