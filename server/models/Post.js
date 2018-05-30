@@ -3,6 +3,7 @@
 var mongoose = require('mongoose');
 
 var postSchema = mongoose.Schema({
+    hnid: Number,
     title: String,
     url: String,
     votes: Number,
