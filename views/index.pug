@@ -2,6 +2,22 @@ extends layout
 
 block content
   
-  a(href='https://news.ycombinator.com') mama-site
-  h1 Welcome to hn-dot-tech 
-  p Here is our database of top hn posts: #{title}!!
+  div(class="navbar navbar-default")
+    div(class="container-fluid")
+      div(class="navbar-header")
+        a(class="navbar-brand" href="#") Home
+      div(class="navbar-header")
+        a(class="navbar-brand" href="#") About 
+      div(class="navbar-header")
+        a(class="navbar-brand" href="#") Find_Post
+      div(class="navbar-header")
+        a(href='https://news.ycombinator.com') mama-site
+  div(class="container")
+    div(class="row")
+      div(class="col-sm")
+        h1 Welcome to hn-dot-tech 
+      div(class="col-sm")
+        p Here is our database of top hn posts: #{title}!!
+        
+
+    
