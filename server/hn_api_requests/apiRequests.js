@@ -32,6 +32,7 @@ const sleep = require('util').promisify(setTimeout);
 async function main() {
     console.log('in main');
     var goOn = true;
+    var postChanged= true;
 
     while(goOn) {
 	console.log('in while');
@@ -50,12 +51,17 @@ async function main() {
      	console.log(firstTopPost.title);
      	Post.find({hnid: topPostId}, function(err, posts){
             if(err) return console.log(err);
+            postChanged = false;
+            return console.log("a top post of the same id was found");
+	});
+        if(postChanged){
             var myData = new Post({hnid: firstTopPost.id, title: firstTopPost.title, url: firstTopPost.url, votes: firstTopPost.score});
 	        myData.save().catch(err => {
 	        console.log(err);
 	        });
 	        console.log('successful save');
-        });
+		postChanged = true;
+	}
         });
         await sleep(3000);
     }
