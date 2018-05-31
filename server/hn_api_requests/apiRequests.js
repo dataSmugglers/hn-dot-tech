@@ -30,12 +30,10 @@ var url = "mongodb://localhost:27017/hndb";
 const sleep = require('util').promisify(setTimeout);
 
 async function main() {
-    console.log('in main');
     var goOn = true;
-    var postChanged= true;
+    var postChanged= false;
 
     while(goOn) {
-	console.log('in while');
   	// Connect to DB
         mongoose.connect(url);
      	var db = mongoose.connection;
@@ -44,11 +42,8 @@ async function main() {
         console.log('db is open');
      	var topPostId = hn.getTopStories();
 
-     	console.log(topPostId);
-     	console.log(topPostId[0]);
      	var firstTopPost = hn.getItem(topPostId[0]);
      	console.log(firstTopPost);
-     	console.log(firstTopPost.title);
      	Post.find({hnid: topPostId}, function(err, posts){
             if(err) return console.log(err);
             postChanged = false;
