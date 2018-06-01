@@ -9,14 +9,15 @@ sudo apt update -y
 sudo apt upgrade -y
 
 # install softwarez
-sudo apt install -y build-essential git tmux wget mongodb-org nodejs
-npm install -g grunt jshint pm2
+sudo apt install -y build-essential gcc g++ make yarn git tmux wget libcurl3 mongodb-org-server nodejs mongo-org
+sudo npm install -g grunt jshint pm2
 sudo systemctl start mongod
 sudo systemctl enable mongod
 
 # clone our repo and install all the node modules
 git clone https://github.com/dataSmugglers/hn-dot-tech
 cd ./hn-dot-tech
+git checkout dev
 npm install
 
 # start up node
