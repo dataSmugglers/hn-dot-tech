@@ -74,7 +74,7 @@ async function main() {
           var topPostId = hn.getTopStories();
           var firstTopPost = hn.getItem(topPostId[0]);
           logger.log('info', firstTopPost);
-          Post.find({hnid: topPostId}, function(err, posts){
+          Post.find({hnid: topPostId[0]}, function(err, posts){
               // Post is not found, insert new post
               if(err) {
                 logger.log('error', err);
