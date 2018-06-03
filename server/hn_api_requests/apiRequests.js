@@ -27,9 +27,10 @@ var Post = require('../models/Post');
 var mongoose = require('mongoose');
 var hn = require('hackernews-api');
 var url = "mongodb://localhost:27017/hndb";
+const sleep = require('util').promisify(setTimeout);
+
 const winston = require('winston');
 const fs = require('fs');
-const sleep = require('util').promisify(setTimeout);
 const logDir = 'log';
 
 // create the log file
@@ -65,7 +66,7 @@ async function main() {
   	// Connect to DB
         mongoose.connect(url);
      	var db = mongoose.connection;
-     	db.on('error', logger.log('error', 'Failed to Connect to DB'));
+     	db.on('error', console.error.bind(console, 'connection error:'));
 
      	db.once('open', function() {
           logger.log('info', 'MAIN: db is open');
@@ -73,12 +74,18 @@ async function main() {
           var topPostId = hn.getTopStories();
           var firstTopPost = hn.getItem(topPostId[0]);
           logger.log('info', firstTopPost);
-
-          
           Post.find({hnid: topPostId}, function(err, posts){
               // Post is not found, insert new post
               if(err) {
-                logger.log('Didnt Find Post in DB, Proceed to insert');
+                logger.log('error', err);
+              }
+              // Found one or more posts
+              if (posts.length) {
+                logger.log('info', 'Found Post with same id, not saving');
+              }
+              // Didnt file post in db
+              else{
+                logger.log('info', "Didnt find post in DB, Proceed to insert");
                 var myData = new Post({
                 hnid: firstTopPost.id, title: firstTopPost.title,
                 url: firstTopPost.url, votes: firstTopPost.score
@@ -91,13 +98,10 @@ async function main() {
                 logger.log('info', 'DB: Successfully saved new post to DB');
               }
               // Did find in DB, don't save it
-              else{
-                logger.log('info', 'Found Post with same id, not saving');
-              }
           });
       });
-      logger.log('info', 'Sleeping for 3 seconds');
-      await sleep(3000);
+      logger.log('info', 'Sleeping for 60 seconds');
+      await sleep(60000);
     }
 }
 
