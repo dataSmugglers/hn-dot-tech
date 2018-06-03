@@ -27,38 +27,77 @@ var Post = require('../models/Post');
 var mongoose = require('mongoose');
 var hn = require('hackernews-api');
 var url = "mongodb://localhost:27017/hndb";
+const winston = require('winston');
+const fs = require('fs');
 const sleep = require('util').promisify(setTimeout);
+const logDir = 'log';
+
+// create the log file
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir);
+}
+
+const tsFormat = () => (new Date()).toLocaleTimeString();
+
+// Create Winston Logger
+const logger = new (winston.Logger) ({
+  transports: [
+    new (winston.transports.File)({
+      filename: `${logDir}/combined.log`,
+      timestamp: tsFormat
+    }),
+    new (winston.transports.Console)({
+      timestamp: tsFormat,
+      colorize: true,
+      level: 'info'
+    }),
+  ]
+});
+
+
 
 async function main() {
     var goOn = true;
-    var postChanged= false;
+
+    logger.log('info', 'MAIN: main has started');
 
     while(goOn) {
   	// Connect to DB
         mongoose.connect(url);
      	var db = mongoose.connection;
-     	db.on('error', console.error.bind(console, 'connection error:'));
-     	db.once('open', function() {
-        console.log('db is open');
-     	var topPostId = hn.getTopStories();
+     	db.on('error', logger.log('error', 'Failed to Connect to DB'));
 
-     	var firstTopPost = hn.getItem(topPostId[0]);
-     	console.log(firstTopPost);
-     	Post.find({hnid: topPostId}, function(err, posts){
-            if(err) return console.log(err);
-            postChanged = false;
-            return console.log("a top post of the same id was found");
-	});
-        if(postChanged){
-            var myData = new Post({hnid: firstTopPost.id, title: firstTopPost.title, url: firstTopPost.url, votes: firstTopPost.score});
-	        myData.save().catch(err => {
-	        console.log(err);
-	        });
-	        console.log('successful save');
-		postChanged = true;
-	}
-        });
-        await sleep(3000);
+     	db.once('open', function() {
+          logger.log('info', 'MAIN: db is open');
+
+          var topPostId = hn.getTopStories();
+          var firstTopPost = hn.getItem(topPostId[0]);
+          logger.log('info', firstTopPost);
+
+          
+          Post.find({hnid: topPostId}, function(err, posts){
+              // Post is not found, insert new post
+              if(err) {
+                logger.log('Didnt Find Post in DB, Proceed to insert');
+                var myData = new Post({
+                hnid: firstTopPost.id, title: firstTopPost.title,
+                url: firstTopPost.url, votes: firstTopPost.score
+                });
+                myData.save(function(err) {
+                  if (err) {
+                    return logger.log('error', 'DB: Could not save to db');
+                  }
+                });
+                logger.log('info', 'DB: Successfully saved new post to DB');
+              }
+              // Did find in DB, don't save it
+              else{
+                logger.log('info', 'Found Post with same id, not saving');
+              }
+          });
+      });
+      logger.log('info', 'Sleeping for 3 seconds');
+      await sleep(3000);
     }
 }
 
