@@ -1,4 +1,4 @@
-#!/bin/bash
+#/bin/bash
 
 # Get Ubuntu machine ready for hn-dot-tech
 # update and grab required software
@@ -9,8 +9,8 @@ sudo apt update -y
 sudo apt upgrade -y
 
 # install softwarez
-sudo apt install -y build-essential gcc g++ make yarn git tmux wget libcurl3 mongodb-org-server nodejs mongo-org
-sudo npm install -g grunt jshint pm2
+sudo apt install -y build-essential gcc g++ make git tmux wget libcurl3 mongodb-org-server nodejs mongodb-org
+npm install -g grunt jshint pm2
 sudo systemctl start mongod
 sudo systemctl enable mongod
 
