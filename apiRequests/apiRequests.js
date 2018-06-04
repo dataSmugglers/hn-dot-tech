@@ -23,7 +23,7 @@
  * - Make the script itself run every minute 
  */
 
-var Post = require('../models/Post');
+var Post = require('../server/models/Post');
 var mongoose = require('mongoose');
 var hn = require('hackernews-api');
 var url = "mongodb://localhost:27017/hndb";
