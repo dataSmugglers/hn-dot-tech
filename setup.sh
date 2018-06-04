@@ -25,3 +25,14 @@ pm2 start ./server/hn_api_requests/apiRequests.js
 pm2 start ./bin/www
 
 # need to start up nginx
+# Nginx Install
+sudo apt-get install nginx
+
+# Lets Encrypt Install
+sudo add-apt-repository ppa:certbot/certbot
+sudo apt-get install python-certbot-nginx
+
+
+echo "SYS ADMIN NOTE: You need to set up ufw or any other filewall"
+echo "SYS ADMIN NOTE: You need to set up LETS ENCRYPT yourself: https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-16-04"
+echo "SYS ADMIN NOTE: You need to set up NGINX config file yourself: https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-16-04
