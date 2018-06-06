@@ -66,32 +66,73 @@ async function main() {
           logger.log('info', firstTopPost);
 
           // Make sure that this post is the same top post
-          if ( topPostId[0] )
-          Post.find({hnid: topPostId[0]}, function(err, posts){
-              // Post is not found, insert new post
-              if(err) {
-                logger.log('error', err);
+          if ( topPostId[0] === lastTopPost ) {
+              logger.log('info',
+                  "The current top post recieved == the last known top post");
+          }
+
+          // There has been a 'top post' change
+          else {
+              // Enter the now-old top post's end time if not a new db
+              if ( lastTopPost != 0) {
+
+                  logger.log('info', 'DETECTED top post change!');
+                  logger.log('info', 'Searching for old top post');
+                  Post.find({hnid: topPostId[lastTopPost]}, function (err, posts) {
+                      if (err) {
+                          logger.log('error', err);
+                      }
+                      // Found one or more posts
+                      if (posts.length) {
+                          posts.finalTimeAsTop.push(new Date());
+                          posts.save(function (err) {
+                              return logger.log('error',
+                                  'Problem Saving finalTimeAsTop');
+                          });
+
+                          logger.log('info', 'Found Post, updated final time');
+                      }
+                      else {
+                          logger.log('error', 'Something went terribly wrong.' +
+                              ' Could not file the now-old top post in db Code:45');
+                      }
+                  });
               }
-              // Found one or more posts
-              if (posts.length) {
-                logger.log('info', 'Found Post with same id, not saving');
-              }
-              // Didnt file post in db
-              else{
-                logger.log('info', "Didnt find post in DB, Proceed to insert");
-                var myData = new Post({
-                hnid: firstTopPost.id, title: firstTopPost.title,
-                url: firstTopPost.url, votes: firstTopPost.score
-                });
-                myData.save(function(err) {
-                  if (err) {
-                    return logger.log('error', 'DB: Could not save to db');
+              // Spot Hero app.. Search for new top post in DB
+              Post.find({hnid: topPostId[0]}, function(err, posts){
+                  if(err) {
+                      logger.log('error', err);
                   }
-                });
-                logger.log('info', 'DB: Successfully saved new post to DB');
-              }
-              // Did find in DB, don't save it
-          });
+                  // Found one or more posts
+                  if (posts.length) {
+                      logger.log('info', 'Found Post with same id, updating init Time');
+                      logger.log('info', posts);
+                      // TODO: There is some weird error I got with this line:
+                      posts.initTimeAsTop.push(new Date());
+                      posts.save(function(err) {
+                          return logger.log('error',
+                              'Problem Saving initTimeAsTop' + err);
+                      });
+                  }
+                  // Didnt file post in db
+                  else{
+                      logger.log('info', "Didnt find post in DB, Proceed to insert");
+                      var myData = new Post({
+                          hnid: firstTopPost.id, title: firstTopPost.title,
+                          url: firstTopPost.url, votes: firstTopPost.score,
+                      });
+                      myData.initTimeAsTop.push(new Date());
+                      myData.save(function(err) {
+                          if (err) {
+                              return logger.log('error', 'DB: Could not save to db');
+                          }
+                      });
+                      logger.log('info', 'DB: Successfully saved new post to DB');
+                  }
+                  // Did find in DB, don't save it
+              });
+              lastTopPost = topPostId[0];
+          }
       });
       logger.log('info', 'Sleeping for 60 seconds');
       await sleep(60000);
