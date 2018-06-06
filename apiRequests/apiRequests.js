@@ -1,14 +1,5 @@
 'use strict';
 
-/*
- * Dev Note:
- * [Tue May 29 13:19:52 2018]: I got the first working code to keep a
- * Javascript file running. I have no idea if this is the best way to
- * do it but I will take on a bit of technical debt because I could 
- * not successfully do a google search to find the optimal way of 
- * doing this. I will write unit tests and try/catch tests to keep
- * testing functionality.
- */
 
 /*
  * Title: apiRequests
@@ -19,8 +10,7 @@
 
 /*
  * Methods of achieving goal:
- * - Make a cron job that every minute runs the apiRequests script
- * - Make the script itself run every minute 
+ * - Make the script itself run every minute
  */
 
 var Post = require('../server/models/Post');
@@ -59,21 +49,24 @@ const logger = new (winston.Logger) ({
 
 async function main() {
     var goOn = true;
+    var lastTopPost = 0;
 
     logger.log('info', 'MAIN: main has started');
 
     while(goOn) {
   	// Connect to DB
-        mongoose.connect(url);
-     	var db = mongoose.connection;
-     	db.on('error', console.error.bind(console, 'connection error:'));
+        var db = connectToDatabase(url);
 
      	db.once('open', function() {
           logger.log('info', 'MAIN: db is open');
 
-          var topPostId = hn.getTopStories();
-          var firstTopPost = hn.getItem(topPostId[0]);
+          var topPostId = getHackerNewsApiRequest_TopPosts();
+
+          var firstTopPost = getHackerNewsApiRequest_TopPostInfo(topPostId);
           logger.log('info', firstTopPost);
+
+          // Make sure that this post is the same top post
+          if ( topPostId[0] )
           Post.find({hnid: topPostId[0]}, function(err, posts){
               // Post is not found, insert new post
               if(err) {
@@ -103,6 +96,23 @@ async function main() {
       logger.log('info', 'Sleeping for 60 seconds');
       await sleep(60000);
     }
+}
+
+function connectToDatabase(url) {
+    mongoose.connect(url);
+    var db = mongoose.connection;
+    db.on('error', console.error.bind(console, 'connection error:'));
+    return db;
+}
+
+function getHackerNewsApiRequest_TopPosts(){
+    var topPostId = hn.getTopStories();
+    return topPostId;
+}
+
+function getHackerNewsApiRequest_TopPostInfo(topPostId){
+    var firstTopPost = hn.getItem(topPostId[0]);
+    return firstTopPost;
 }
 
 main();
