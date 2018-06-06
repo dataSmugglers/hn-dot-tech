@@ -1,4 +1,5 @@
 # I think we could just ignore the /build
+.idea
 build
 # Logs
 logs
