@@ -54,8 +54,6 @@ async function main() {
     logger.log('info', 'MAIN: main has started');
 
     // Before loop begins, get the top post
-    var db = connectToDatabase(url);
-    db.once('open', function() {
 
         var topPostId = getHackerNewsApiRequest_TopPosts();
         var firstTopPost = getHackerNewsApiRequest_TopPostInfo(topPostId[0]);
@@ -71,88 +69,41 @@ async function main() {
             add_new_Post(url, firstTopPost.id, firstTopPost.title, firstTopPost.url, firstTopPost.score);
         }
 
-    });
     while(goOn) {
-  	// Connect to DB
-        var db = connectToDatabase(url);
 
-     	db.once('open', function() {
-          logger.log('info', 'MAIN: db is open');
 
           var topPostId = getHackerNewsApiRequest_TopPosts();
-
           var firstTopPost = getHackerNewsApiRequest_TopPostInfo(topPostId[0]);
-          logger.log('info', firstTopPost);
+          logger.log('info', 'Current top post id: ' + firstTopPost.id +
+              "\nCurrent top post title: " + firstTopPost.title );
 
           // Make sure that this post is the same top post
           if ( topPostId[0] === lastTopPost ) {
               logger.log('info',
-                  "The current top post recieved == the last known top post");
+                  "The current top post received == the last known top post");
           }
 
           // There has been a 'top post' change
           else {
               // Enter the now-old top post's end time if not a new db
-              if ( lastTopPost != 0) {
-
-                  logger.log('info', 'DETECTED top post change!');
-                  logger.log('info', 'Searching for old top post');
-                  Post.find({hnid: topPostId[lastTopPost]}, function (err, posts) {
-                      if (err) {
-                          logger.log('error', err);
-                      }
-                      // Found one or more posts
-                      if (posts.length) {
-                          posts.finalTimeAsTop.push(new Date());
-                          posts.save(function (err) {
-                              return logger.log('error',
-                                  'Problem Saving finalTimeAsTop');
-                          });
-
-                          logger.log('info', 'Found Post, updated final time');
-                      }
-                      else {
-                          logger.log('error', 'Something went terribly wrong.' +
-                              ' Could not file the now-old top post in db Code:45');
-                      }
-                  });
+              logger.log('info', 'DETECTED top post change!');
+              logger.log('info', 'Searching for old top post');
+              if (add_to_Post_finalTimeAsTop(url, lastTopPost)) {
+                  logger.log('info', 'UPDATED: Successfully added Final_time to last top post');
               }
-              // Spot Hero app.. Search for new top post in DB
-              Post.find({hnid: topPostId[0]}, function(err, posts){
-                  if(err) {
-                      logger.log('error', err);
-                  }
-                  // Found one or more posts
-                  if (posts.length) {
-                      logger.log('info', 'Found Post with same id, updating init Time');
-                      logger.log('info', posts);
-                      // TODO: There is some weird error I got with this line:
-                      posts.initTimeAsTop.push(new Date());
-                      posts.save(function(err) {
-                          return logger.log('error',
-                              'Problem Saving initTimeAsTop' + err);
-                      });
-                  }
-                  // Didnt file post in db
-                  else{
-                      logger.log('info', "Didnt find post in DB, Proceed to insert");
-                      var myData = new Post({
-                          hnid: firstTopPost.id, title: firstTopPost.title,
-                          url: firstTopPost.url, votes: firstTopPost.score,
-                      });
-                      myData.initTimeAsTop.push(new Date());
-                      myData.save(function(err) {
-                          if (err) {
-                              return logger.log('error', 'DB: Could not save to db');
-                          }
-                      });
-                      logger.log('info', 'DB: Successfully saved new post to DB');
-                  }
-                  // Did find in DB, don't save it
-              });
+              else {
+                  logger.log('error', 'Unsuccessfully added final_time to last top post');
+              }
+
+              if (is_Post_in_hndb(url, topPostId[0])) {
+                  add_to_Post_initTimeAsTop(url, topPostId);
+              }
+              else {    // Didnt file post in db
+                  add_new_Post(url, firstTopPost.id, firstTopPost.title, firstTopPost.url, firstTopPost.score);
+              }
+
               lastTopPost = topPostId[0];
           }
-      });
       logger.log('info', 'Sleeping for 60 seconds');
       await sleep(60000);
     }
@@ -183,6 +134,7 @@ function getHackerNewsApiRequest_TopPostInfo(topPostId){
 function is_Post_in_hndb(db_url, postId){
     var db = connectToDatabase(db_url);
     db.once('open', function(){
+        logger.log('info', 'MAIN: db is open: is_Post_in_hndb');
         Post.find({hnid: postId}, function(err, posts){
             if(err) {
                 logger.log('error', err);
@@ -190,14 +142,13 @@ function is_Post_in_hndb(db_url, postId){
             }
             // Found one or more posts
             if (posts.length) {
-                logger.log('info', 'Found Post with same id, updating init Time');
-                logger.log('info', posts);
-                // TODO: There is some weird error I got with this line:
+                logger.log('info', 'Found Post with same id');
+                logger.log('info', 'This is the post: \n  ' + posts);
                 return true;
             }
             // Didnt find post in db
             else{
-                logger.log('info', "Didnt find post in DB, Proceed to insert");
+                logger.log('info', "Didnt find post in DB");
                 return false;
             }
             // Did find in DB, don't save it
@@ -213,6 +164,7 @@ function is_Post_in_hndb(db_url, postId){
 function add_to_Post_finalTimeAsTop(db_url, postId) {
     var db = connectToDatabase(db_url);
     db.once('open', function() {
+        logger.log('info', 'MAIN: db is open: add_to_Post_finalTimeAsTop');
         Post.find({hnid: postId}, function (err, posts) {
             if (err) {
                 logger.log('error', err);
@@ -237,6 +189,8 @@ function add_to_Post_finalTimeAsTop(db_url, postId) {
 function add_new_Post(db_url, post_Id, post_title, post_url, post_votes){
     var db = connectToDatabase(db_url);
     db.once('open', function() {
+
+        logger.log('info', 'MAIN: db is open: add_new_Post');
         var myData = new Post({
             hnid: post_Id, title: post_title,
             url: post_url, votes: post_votes
@@ -252,6 +206,7 @@ function add_new_Post(db_url, post_Id, post_title, post_url, post_votes){
 function delete_Post_by_id(db_url, post_id){
     var db = connectToDatabase(db_url);
     db.once('open', function() {
+        logger.log('info', 'MAIN: db is open: delete_Post_by_id');
         Post.deleteOne({hnid: post_id}, function(err, posts) {
             if (err) {
                 logger.log('error', err);
@@ -266,6 +221,7 @@ function delete_Post_by_id(db_url, post_id){
 function add_to_Post_initTimeAsTop(db_url, post_id){
     var db = connectToDatabase(db_url);
     db.once('open', function(){
+        logger.log('info', 'MAIN: db is open: add_to_Post_initTimeAsTop');
         Post.find({hnid: post_id}, function(err, posts) {
             if (err) {
                 logger.log('error', err);
