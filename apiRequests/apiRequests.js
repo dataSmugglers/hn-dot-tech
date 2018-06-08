@@ -17,6 +17,79 @@ var Post = require('../server/models/Post');
 var mongoose = require('mongoose');
 var hn = require('hackernews-api');
 var url = "mongodb://localhost:27017/hndb";
+
+// Testing Waters
+var is_Post_in_hndb = function (db, postId, callback) {
+    db.once('open', function() {
+        logger.log('info', 'MAIN: db is open: is_Post_in_hndb');
+        Post.find({hnid: postId}, function (err, posts) {
+            if (err) {
+                callback(err, null);
+            }
+            if (posts.length) {
+                callback(null, posts);
+            }
+            // Didnt find post in db
+            else {
+                callback(new Error('Didnt Find post in db'), null);
+            }
+        });
+    });
+};
+
+var add_new_Post = function(db, top_post, callback) {
+    db.once('open', function() {
+        logger.log('info', 'MAIN: db is open: add_new_Post');
+        var myData = new Post({
+            hnid: top_post.id, title: top_post.title,
+            url: top_post.url, votes: top_post.score
+        });
+        myData.initTimeAsTop.push(new Date());
+        myData.save(function (err) {
+            if (err) {
+                callback(err);
+            }
+            callback(null);
+        });
+    });
+}
+
+var delete_Post_by_id = function(db, id, callback) {
+    db.once('open', function(){
+        logger.log('info', 'MAIN: db is open: delete_Post_by_id');
+        Post.deleteOne({hnid: post_id}, function(err) {
+            if (err) {
+                callback(err);
+            }
+            callback(err);
+        });
+    });
+}
+var add_to_Post_finalTimeAsTop = function(db_url, postId, callback) {
+    db.once('open', function(){
+        logger.log('info', 'MAIN: db is open: add_to_Post_finalTimeAsTop' );
+        Post.find({hnid: postId}, function (err, posts) {
+            if (err) {
+                logger.log('error', err);
+                return callback(err);
+            }
+            // Found one or more posts
+            if (posts.length) {
+                logger.log('info', 'Found Post with same id, updating final Time');
+                logger.log('info', 'post found id: '+posts.id);
+                // TODO: There is some weird error I got with this line:
+                posts.initTimeAsTop.push(new Date());
+                posts.save(function (err) {
+                    logger.log('error', 'Problem Saving (updating) final time')
+                    return callback(err);
+                });
+                return callback(null);
+            }
+        });
+    }
+});
+// END Testing Waters
+
 const sleep = require('util').promisify(setTimeout);
 
 const winston = require('winston');
@@ -49,25 +122,39 @@ const logger = new (winston.Logger) ({
 
 async function main() {
     var goOn = true;
-    var lastTopPost = 0; // Im sick of this line. Im changing it to read the latest post
 
     logger.log('info', 'MAIN: main has started');
 
     // Before loop begins, get the top post
+    var topPostId = getHackerNewsApiRequest_TopPosts();
+    var firstTopPost = getHackerNewsApiRequest_TopPostInfo(topPostId[0]);
+    var lastTopPost = topPostId[0];
 
-        var topPostId = getHackerNewsApiRequest_TopPosts();
-        var firstTopPost = getHackerNewsApiRequest_TopPostInfo(topPostId[0]);
-        lastTopPost = topPostId[0];
+    mongoose.connect(url, { keepAlive: 120 });
+    var db = mongoose.connection;
+    db.on('error', console.error.bind(console, 'connection error:'));
 
-        if (is_Post_in_hndb(url, topPostId[0])){
-            // Delete and add again with new initTime
-            delete_Post_by_id(url, topPostId[0])
-            add_new_Post(url, firstTopPost.id, firstTopPost.title, firstTopPost.url, firstTopPost.score);
+    is_Post_in_hndb(db, topPostId[0], function (err, post) {
+        if (err) { // Didnt find post in db
+            logger.log('info', "Didnt find post in DB");
+            logger.log('info', "Starting process to add post to db");
+            add_new_Post(db, firstTopPost, function(err){
+                    if (err) logger.log('error', 'Could not add new post ERR1');
+                    logger.log('info', "Successfully Added post: "+topPostId[0]);
+                });
         }
-        else {
-            // Add to db
-            add_new_Post(url, firstTopPost.id, firstTopPost.title, firstTopPost.url, firstTopPost.score);
-        }
+        // Delete and add again with new initTime
+        logger.log('info', 'Found Post with same id');
+        delete_Post_by_id(db,  topPostId[0], function(error) {
+            if (err) logger.log('error', 'Could not delete post: '+topPostId[0]);
+            logger.log('info', 'Successfully deleted post (id: ' + post_id +
+                ') from db');
+        });
+        add_new_Post(db, firstTopPost, function(err){
+            if (err) logger.log('error', 'Could not add new post ERR2');
+            logger.log('info', "Successfully Added post: "+topPostId[0]);
+        });
+    });
 
     while(goOn) {
 
@@ -110,7 +197,7 @@ async function main() {
 }
 
 function connectToDatabase(url) {
-    mongoose.connect(url);
+    mongoose.connect(url, { keepAlive: 120 });
     var db = mongoose.connection;
     db.on('error', console.error.bind(console, 'connection error:'));
     return db;
@@ -131,30 +218,64 @@ function getHackerNewsApiRequest_TopPostInfo(topPostId){
 * @param postId a hackernews post id
 * @return       boolean, whether or not the id is in the db
  */
-function is_Post_in_hndb(db_url, postId){
+
+/* function is_Post_in_hndb(db_url, postId){
     var db = connectToDatabase(db_url);
-    db.once('open', function(){
+    var verify_in_db = true;
+    db.once('open', function( ){
         logger.log('info', 'MAIN: db is open: is_Post_in_hndb');
         Post.find({hnid: postId}, function(err, posts){
             if(err) {
                 logger.log('error', err);
+                verify_in_db = false;
                 return false;
             }
             // Found one or more posts
             if (posts.length) {
                 logger.log('info', 'Found Post with same id');
                 logger.log('info', 'This is the post: \n  ' + posts);
+                verify_in_db = true;
                 return true;
             }
             // Didnt find post in db
             else{
                 logger.log('info', "Didnt find post in DB");
+                verify_in_db = false;
                 return false;
             }
             // Did find in DB, don't save it
         });
     });
+    console.log(db);
+
+    db.once('open', function( ){
+        logger.log('info', 'MAIN: db is open: is_Post_in_hndb');
+        Post.find({hnid: postId}, function(err, posts){
+            if(err) {
+                logger.log('error', err);
+                verify_in_db = false;
+                return false;
+            }
+            // Found one or more posts
+            if (posts.length) {
+                logger.log('info', 'Found Post with same id');
+                logger.log('info', 'This is the post: \n  ' + posts);
+                verify_in_db = true;
+                return true;
+            }
+            // Didnt find post in db
+            else{
+                logger.log('info', "Didnt find post in DB");
+                verify_in_db = false;
+                return false;
+            }
+            // Did find in DB, don't save it
+        });
+    });
+    console.log(db);
+    return verify_in_db;
 }
+*/
 
 /*
 * @param db     a valid mongoose db connection
@@ -185,37 +306,6 @@ function add_to_Post_finalTimeAsTop(db_url, postId) {
         });
     });
     return false;
-}
-function add_new_Post(db_url, post_Id, post_title, post_url, post_votes){
-    var db = connectToDatabase(db_url);
-    db.once('open', function() {
-
-        logger.log('info', 'MAIN: db is open: add_new_Post');
-        var myData = new Post({
-            hnid: post_Id, title: post_title,
-            url: post_url, votes: post_votes
-        });
-        myData.initTimeAsTop.push(new Date());
-        myData.save(function (err) {
-            if (err) {
-                return logger.log('error', 'DB: Could not save to db');
-            }
-        });
-    });
-}
-function delete_Post_by_id(db_url, post_id){
-    var db = connectToDatabase(db_url);
-    db.once('open', function() {
-        logger.log('info', 'MAIN: db is open: delete_Post_by_id');
-        Post.deleteOne({hnid: post_id}, function(err, posts) {
-            if (err) {
-                logger.log('error', err);
-                return false;
-            }
-            return true;
-        });
-        return false;
-    });
 }
 
 function add_to_Post_initTimeAsTop(db_url, post_id){
