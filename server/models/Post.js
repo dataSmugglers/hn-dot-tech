@@ -7,8 +7,8 @@ var postSchema = mongoose.Schema({
     title: String,
     url: String,
     votes: Number,
-    initTimeAsTop: Number,
-    finalTimeAsTop: Number
+    initTimeAsTop: [Date],
+    finalTimeAsTop: [Date]
 });
 
 module.exports = mongoose.model('Post', postSchema);

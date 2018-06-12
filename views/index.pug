@@ -25,7 +25,8 @@ block content
         hr
         p Here is our database of top hn posts:
         each item in title
-          p= item.title
+          a(href=item.url target="_blank")= item.title
+          br
         hr
         p #{title}
 
