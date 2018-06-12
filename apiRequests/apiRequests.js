@@ -65,7 +65,7 @@ var delete_Post_by_id = function(db, id, callback) {
         });
     });
 }
-var add_to_Post_finalTimeAsTop = function(db_url, postId, callback) {
+var add_to_Post_finalTimeAsTop = function(db, postId, callback) {
     db.once('open', function(){
         logger.log('info', 'MAIN: db is open: add_to_Post_finalTimeAsTop' );
         Post.find({hnid: postId}, function (err, posts) {
@@ -86,8 +86,33 @@ var add_to_Post_finalTimeAsTop = function(db_url, postId, callback) {
                 return callback(null);
             }
         });
-    }
-});
+    });
+}
+
+var add_to_Post_initTimeAsTop = function(db, post_id, callback){
+    db.once('open', function(){
+        logger.log('info', 'MAIN: db is open: add_to_Post_initTimeAsTop');
+        Post.find({hnid: post_id}, function(err, posts) {
+            if (err) {
+                logger.log('error', err);
+                return callback(err);
+            }
+            // Found one or more posts
+            if (posts.length) {
+                logger.log('info', 'Found Post with same id, updating init Time');
+                logger.log('info', posts);
+                // TODO: There is some weird error I got with this line:
+                posts.initTimeAsTop.push(new Date());
+                posts.save(function (err) {
+                    logger.log('error', 'Problem Saving initTimeAsTop' + err);
+                    return callback(err);
+                });
+                return callback(null);
+            }
+            return callback(null);
+        });
+    });
+}
 // END Testing Waters
 
 const sleep = require('util').promisify(setTimeout);
@@ -143,17 +168,19 @@ async function main() {
                     logger.log('info', "Successfully Added post: "+topPostId[0]);
                 });
         }
-        // Delete and add again with new initTime
-        logger.log('info', 'Found Post with same id');
-        delete_Post_by_id(db,  topPostId[0], function(error) {
-            if (err) logger.log('error', 'Could not delete post: '+topPostId[0]);
-            logger.log('info', 'Successfully deleted post (id: ' + post_id +
-                ') from db');
-        });
-        add_new_Post(db, firstTopPost, function(err){
-            if (err) logger.log('error', 'Could not add new post ERR2');
-            logger.log('info', "Successfully Added post: "+topPostId[0]);
-        });
+        else { // Found post in db
+            // Delete and add again with new initTime
+            logger.log('info', 'Found Post with same id');
+            delete_Post_by_id(db, topPostId[0], function (err) {
+                if (err) logger.log('error', 'Could not delete post: ' + topPostId[0]);
+                logger.log('info', 'Successfully deleted post (id: ' + post_id +
+                    ') from db');
+            });
+            add_new_Post(db, firstTopPost, function (err) {
+                if (err) logger.log('error', 'Could not add new post ERR2');
+                logger.log('info', "Successfully Added post: " + topPostId[0]);
+            });
+        }
     });
 
     while(goOn) {
@@ -175,19 +202,47 @@ async function main() {
               // Enter the now-old top post's end time if not a new db
               logger.log('info', 'DETECTED top post change!');
               logger.log('info', 'Searching for old top post');
-              if (add_to_Post_finalTimeAsTop(url, lastTopPost)) {
-                  logger.log('info', 'UPDATED: Successfully added Final_time to last top post');
-              }
-              else {
-                  logger.log('error', 'Unsuccessfully added final_time to last top post');
-              }
 
-              if (is_Post_in_hndb(url, topPostId[0])) {
-                  add_to_Post_initTimeAsTop(url, topPostId);
-              }
-              else {    // Didnt file post in db
-                  add_new_Post(url, firstTopPost.id, firstTopPost.title, firstTopPost.url, firstTopPost.score);
-              }
+
+              add_to_Post_finalTimeAsTop(db, lastTopPost, function(err, post) {
+                  if (err) {
+                      logger.log('error',
+                          'Unsuccessfully added final_time to last top post');
+                  }
+                  else {
+                      logger.log('info', 'UPDATED: Successfully added' +
+                          'Final_time to last top post');
+                  }
+              });
+
+              is_Post_in_hndb(db, topPostId[0], function(err) {
+                  if (err) {
+                      add_new_Post(db, firstTopPost, function(err) {
+                          if (err) {
+                              logger.log("error", "Could not add new TOP POST" +
+                                  "to db");
+                          }
+                          else {
+                              logger.log("info", "Successfully added new TOP " +
+                                  "POST to db");
+                          }
+                      });
+                  }
+                  else {    // Didnt file post in db
+                      add_to_Post_initTimeAsTop(db, topPostId, function(err) {
+                          if (err) {
+                              logger.log('error', err + "Found Same post but" +
+                                  "Could not update initTime to db");
+                          }
+                          else {
+                              logger.log('info', "Found Same post and" +
+                                  "updated initTime to db");
+
+                          }
+                      });
+
+                  }
+              });
 
               lastTopPost = topPostId[0];
           }
@@ -282,6 +337,8 @@ function getHackerNewsApiRequest_TopPostInfo(topPostId){
 * @param postId a hackernews post id
 * @return       boolean, whether or not the id is in the db
  */
+
+/*
 function add_to_Post_finalTimeAsTop(db_url, postId) {
     var db = connectToDatabase(db_url);
     db.once('open', function() {
@@ -332,8 +389,9 @@ function add_to_Post_initTimeAsTop(db_url, post_id){
             return false;
         });
     });
-
 }
+
+*/
 
 main();
 
