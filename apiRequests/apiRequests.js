@@ -65,54 +65,44 @@ var delete_Post_by_id = function(db, id, callback) {
     });
 }
 
-var add_to_Post_finalTimeAsTop = function(db, postId, callback) {
+var add_to_Post_finalTimeAsTop = function(db, post_id, callback) {
     db.once('open', function(){
         logger.log('info', 'MAIN: db is open: add_to_Post_finalTimeAsTop' );
-        Post.find({hnid: postId}, function (err, posts) {
+        Post.findOneAndUpdate({hnid: post_id},
+                {$push: {finalTimeAsTop: new Date()}}, function (err, doc) {
             if (err) {
-                logger.log('error', err);
-                return callback(err);
+                logger.log('error', "Could not update finalTime. Err:"+err);
+                return callback(err, null);
             }
             // Found one or more posts
-            if (posts.length) {
+            else {
                 logger.log('info', 'Found Post with same id, updating final Time');
-                logger.log('info', 'post found id: '+posts.hnid);
-                // TODO: There is some weird error I got with this line:
-                posts.initTimeAsTop.push(new Date());
-                posts.save(function (err) {
-                    logger.log('error', 'Problem Saving (updating) final time')
-                    return callback(err);
-                });
-                return callback(null);
+                logger.log('info', 'post found id: '+ doc.hnid);
+                return callback(null, doc);
             }
         });
     });
-}
+};
 
 var add_to_Post_initTimeAsTop = function(db, post_id, callback){
     db.once('open', function(){
         logger.log('info', 'MAIN: db is open: add_to_Post_initTimeAsTop');
-        Post.find({hnid: post_id}, function(err, posts) {
+        Post.findOneAndUpdate({hnid: post_id},
+                {$push: {initTimeAsTop: new Date()}}, function(err, doc) {
             if (err) {
-                logger.log('error', err);
-                return callback(err);
+                logger.log('error', "Could not update the initTimeAsTop");
+                return callback(err, null);
             }
-            // Found one or more posts
-            if (posts.length) {
-                logger.log('info', 'Found Post with same id, updating init Time');
-                logger.log('info', posts);
-                // TODO: There is some weird error I got with this line:
-                posts.initTimeAsTop.push(new Date());
-                posts.save(function (err) {
-                    logger.log('error', 'Problem Saving initTimeAsTop' + err);
-                    return callback(err);
-                });
-                return callback(null);
+            // Able to add to initTime
+            else {
+                logger.log('info', '  Found Post with same id, ' +
+                    'updating final Time');
+                logger.log('info', '  post found id: '+ doc.hnid);
+                return callback(null, doc);
             }
-            return callback(null);
         });
     });
-}
+};
 
 var top_post_cumulative_time_duration = function (db, post_id, callback) {
     return;
