@@ -76,7 +76,7 @@ var add_to_Post_finalTimeAsTop = function(db, postId, callback) {
             // Found one or more posts
             if (posts.length) {
                 logger.log('info', 'Found Post with same id, updating final Time');
-                logger.log('info', 'post found id: '+posts.id);
+                logger.log('info', 'post found id: '+posts.hnid);
                 // TODO: There is some weird error I got with this line:
                 posts.initTimeAsTop.push(new Date());
                 posts.save(function (err) {
@@ -114,6 +114,9 @@ var add_to_Post_initTimeAsTop = function(db, post_id, callback){
     });
 }
 
+var top_post_cumulative_time_duration = function (db, post_id, callback) {
+    return;
+}
 const sleep = require('util').promisify(setTimeout);
 
 const winston = require('winston');
@@ -397,3 +400,4 @@ module.exports.add_new_Post = add_new_Post;
 module.exports.delete_Post_by_id = delete_Post_by_id;
 module.exports.add_to_Post_finalTimeAsTop = add_to_Post_finalTimeAsTop;
 module.exports.add_to_Post_initTimeAsTop = add_to_Post_initTimeAsTop;
+module.exports.top_post_cumulative_time_duration = top_post_cumulative_time_duration ;

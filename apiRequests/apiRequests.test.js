@@ -17,10 +17,19 @@ const logger = new (winston.Logger) ({
         })
     ]
 });
-var post1 = {"hnid" : 17261869, "title" :
-    "Justice Dept. Seizes Times Reporter’s Email/Phone Records in Leak Investigation",
-    "url" : "https://mobile.nytimes.com/2018/06/07/us/politics/times-reporter-phone-records-seized.html",
-    "votes" : 189, "__v" : 0 }
+var post1 = {"initTimeAsTop": [ ], "finalTimeAsTop": [ ], "id": 17261869, "title" :
+        "Justice Dept. Seizes Times Reporter’s Email/Phone",
+    "url" : "https://mobile.nytimes.com/2018/06/07/us/politics/",
+    "votes" : 189
+};
+
+var post2 = {
+    "initTimeAsTop": [ ], "finalTimeAsTop": [ ], "id": 17262510,
+    "title": "Home Depot stocked shelves with empty boxes in its early days",
+    "url": "https://www.cnbc.com/2018/06/01/home-depot-co-founder-ken-langone-on-the-early-days-of-the-business.html",
+    "votes": 77
+};
+
 
 beforeEach( () => {
     mongoose.connect(url);
@@ -39,22 +48,66 @@ db.on('error', console.error.bind(console, 'connection error:'));
 test('Insert a new post', done => {
     function callback(err) {
         expect(err).toBe(null);
-        mongoose.connection.close();
+        logger.log('info', "TEST: add_new_Post seems to work");
         done();
     }
-
     apiRequest.add_new_Post(db, post1, callback);
 });
 
-/*
+test('Check if a post exists that is IN DB', done => {
+    function callback(err) {
+        expect(err).toBe(null);
+        logger.log('info', "TEST: is_Post_in_hndb seems to work");
+        done();
+    }
+    apiRequest.is_Post_in_hndb(db, post1.id, callback);
+});
+
+test('Check if a post exists that is NOT in DB', done => {
+    function callback(err) {
+        expect(err).not.toBe(null);
+        logger.log('info',
+            "TEST[non-existent]: is_Post_in_hndb seems to work");
+        logger.log('info', "TEST[non-existent]: is_Post_in_hndb err: " +err);
+        done();
+    }
+    apiRequest.is_Post_in_hndb(db, post2.id, callback);
+});
+
+test('Add Initial_Time to a post.', done => {
+    function callback(err) {
+        expect(err).toBe(null);
+        logger.log('info',
+            "TEST: add_to_Post_initTimeAsTop seems to work");
+        done();
+    }
+    apiRequest.add_to_Post_initTimeAsTop(db, post1.id, callback);
+});
+
+test('Add Final Time to a post.', done => {
+    function callback(err) {
+        expect(err).toBe(null);
+        logger.log('info', "TEST: add_to_Post_FinalTimeAsTop seems to work");
+        done();
+    }
+    apiRequest.add_to_Post_finalTimeAsTop(db, post1.id, callback);
+});
+
+test('Calculating running top_post time', done => {
+    function callback(err, duration) {
+        expect(duration).toBe(10);
+        logger.log('info', 'TEST: duration is 10min')
+        done();
+    }
+    apiRequest.top_post_cumulative_time_duration(db, post1.id, callback);
+});
+
 test('Delete a new post', done => {
     function callback(err) {
-    expect(err).toBe(null);
-    //mongoose.disconnect();
-    done();
-}
-
-apiRequest.delete_Post_by_id(db, 17261869, callback);
-
+        expect(err).toBe(null);
+        logger.log('info', 'TEST: Deleted post')
+        // mongoose.connection.close();
+        done();
+    }
+    apiRequest.delete_Post_by_id(db, post1.id, callback);
 });
-*/
