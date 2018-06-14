@@ -18,6 +18,12 @@ var mongoose = require('mongoose');
 var hn = require('hackernews-api');
 var url = "mongodb://localhost:27017/hndb";
 
+/*
+* @param db     a valid mongoose db connection
+* @param postId a hackernews post id
+* @param cb     callback(err, doc)
+* @return       boolean, whether or not the id is in the db
+ */
 var is_Post_in_hndb = function (db, postId, callback) {
     db.once('open', function() {
         logger.log('info', 'MAIN: db is open: is_Post_in_hndb');
@@ -147,7 +153,7 @@ const logger = new (winston.Logger) ({
 
 
 
-async function main() {
+var start = async function() {
     var goOn = true;
 
     logger.log('info', 'MAIN: main has started');
@@ -270,131 +276,8 @@ function getHackerNewsApiRequest_TopPostInfo(topPostId){
     return firstTopPost;
 }
 
-/*
-* @param db     a valid mongoose db connection
-* @param postId a hackernews post id
-* @return       boolean, whether or not the id is in the db
- */
 
-/* function is_Post_in_hndb(db_url, postId){
-    var db = connectToDatabase(db_url);
-    var verify_in_db = true;
-    db.once('open', function( ){
-        logger.log('info', 'MAIN: db is open: is_Post_in_hndb');
-        Post.find({hnid: postId}, function(err, posts){
-            if(err) {
-                logger.log('error', err);
-                verify_in_db = false;
-                return false;
-            }
-            // Found one or more posts
-            if (posts.length) {
-                logger.log('info', 'Found Post with same id');
-                logger.log('info', 'This is the post: \n  ' + posts);
-                verify_in_db = true;
-                return true;
-            }
-            // Didnt find post in db
-            else{
-                logger.log('info', "Didnt find post in DB");
-                verify_in_db = false;
-                return false;
-            }
-            // Did find in DB, don't save it
-        });
-    });
-    console.log(db);
-
-    db.once('open', function( ){
-        logger.log('info', 'MAIN: db is open: is_Post_in_hndb');
-        Post.find({hnid: postId}, function(err, posts){
-            if(err) {
-                logger.log('error', err);
-                verify_in_db = false;
-                return false;
-            }
-            // Found one or more posts
-            if (posts.length) {
-                logger.log('info', 'Found Post with same id');
-                logger.log('info', 'This is the post: \n  ' + posts);
-                verify_in_db = true;
-                return true;
-            }
-            // Didnt find post in db
-            else{
-                logger.log('info', "Didnt find post in DB");
-                verify_in_db = false;
-                return false;
-            }
-            // Did find in DB, don't save it
-        });
-    });
-    console.log(db);
-    return verify_in_db;
-}
-*/
-
-/*
-* @param db     a valid mongoose db connection
-* @param postId a hackernews post id
-* @return       boolean, whether or not the id is in the db
- */
-
-/*
-function add_to_Post_finalTimeAsTop(db_url, postId) {
-    var db = connectToDatabase(db_url);
-    db.once('open', function() {
-        logger.log('info', 'MAIN: db is open: add_to_Post_finalTimeAsTop');
-        Post.find({hnid: postId}, function (err, posts) {
-            if (err) {
-                logger.log('error', err);
-                return false;
-            }
-            // Found one or more posts
-            if (posts.length) {
-                logger.log('info', 'Found Post with same id, updating final Time');
-                logger.log('info', posts);
-                // TODO: There is some weird error I got with this line:
-                posts.initTimeAsTop.push(new Date());
-                posts.save(function (err) {
-                    logger.log('error', 'Problem Saving final time')
-                    return false;
-                });
-                return true;
-            }
-        });
-    });
-    return false;
-}
-
-function add_to_Post_initTimeAsTop(db_url, post_id){
-    var db = connectToDatabase(db_url);
-    db.once('open', function(){
-        logger.log('info', 'MAIN: db is open: add_to_Post_initTimeAsTop');
-        Post.find({hnid: post_id}, function(err, posts) {
-            if (err) {
-                logger.log('error', err);
-                return false;
-            }
-            // Found one or more posts
-            if (posts.length) {
-                logger.log('info', 'Found Post with same id, updating init Time');
-                logger.log('info', posts);
-                // TODO: There is some weird error I got with this line:
-                posts.initTimeAsTop.push(new Date());
-                posts.save(function (err) {
-                    logger.log('error', 'Problem Saving initTimeAsTop' + err);
-                    return false;
-                });
-                return true;
-            }
-            return false;
-        });
-    });
-}
-
-*/
-
+module.exports.start = start;
 module.exports.is_Post_in_hndb = is_Post_in_hndb;
 module.exports.add_new_Post = add_new_Post;
 module.exports.delete_Post_by_id = delete_Post_by_id;

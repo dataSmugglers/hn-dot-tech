@@ -106,7 +106,6 @@ test('Delete a new post', done => {
     function callback(err) {
         expect(err).toBe(null);
         logger.log('info', 'TEST: Deleted post')
-        // mongoose.connection.close();
         done();
     }
     apiRequest.delete_Post_by_id(db, post1.id, callback);
