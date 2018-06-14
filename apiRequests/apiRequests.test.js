@@ -75,33 +75,32 @@ test('Check if a post exists that is NOT in DB', done => {
 });
 
 test('Add Initial_Time to a post.', done => {
-    function callback(err) {
-        expect(err).toBe(null);
+    function callback(err, doc) {
         logger.log('info',
-            "TEST: add_to_Post_initTimeAsTop seems to work");
+        "TEST: add_to_Post_initTimeAsTop starting");
+        expect(err).toBe(null);
+        expect(doc.initTimeAsTop).not.toBe([]);
         done();
     }
     apiRequest.add_to_Post_initTimeAsTop(db, post1.id, callback);
 });
 
 test('Add Final Time to a post.', done => {
-    function callback(err) {
+    function callback(err, doc) {
         expect(err).toBe(null);
-        logger.log('info', "TEST: add_to_Post_FinalTimeAsTop seems to work");
+        logger.log('info', 'TEST: add_to_Post_finalTimeAsTop starting')
+        expect(doc.finalTimeAsTop).not.toBe([]);
         done();
     }
     apiRequest.add_to_Post_finalTimeAsTop(db, post1.id, callback);
 });
 
-test('Calculating running top_post time', done => {
-    function callback(err, duration) {
-        expect(duration).toBe(10);
-        logger.log('info', 'TEST: duration is 10min')
-        done();
-    }
-    apiRequest.top_post_cumulative_time_duration(db, post1.id, callback);
+test('Calculating running top_post time', () => {
+    var one = apiRequest.top_post_cumulative_time_duration(db, post1.id, callback);
+        expect(one).toBe(10);
 });
 
+/*
 test('Delete a new post', done => {
     function callback(err) {
         expect(err).toBe(null);
@@ -110,3 +109,4 @@ test('Delete a new post', done => {
     }
     apiRequest.delete_Post_by_id(db, post1.id, callback);
 });
+*/
