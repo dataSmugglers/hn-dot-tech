@@ -14,7 +14,7 @@
   },
   "scripts": {
     "start": "node ./bin/www",
-    "test": "jest"
+    "test": "jest --runInBand"
   },
   "devDependencies": {
     "cookie-parser": "^1.4.3",
@@ -39,6 +39,7 @@
     "http-errors": "^1.6.3",
     "jest": "^23.1.0",
     "less-middleware": "^3.0.0",
+    "mongodb-memory-server": "^1.8.0",
     "morgan": "^1.9.0",
     "pug": "^2.0.3",
     "winston": "^2.4.2"

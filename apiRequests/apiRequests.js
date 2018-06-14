@@ -18,7 +18,6 @@ var mongoose = require('mongoose');
 var hn = require('hackernews-api');
 var url = "mongodb://localhost:27017/hndb";
 
-// Testing Waters
 var is_Post_in_hndb = function (db, postId, callback) {
     db.once('open', function() {
         logger.log('info', 'MAIN: db is open: is_Post_in_hndb');
@@ -57,7 +56,7 @@ var add_new_Post = function(db, top_post, callback) {
 var delete_Post_by_id = function(db, id, callback) {
     db.once('open', function(){
         logger.log('info', 'MAIN: db is open: delete_Post_by_id');
-        Post.deleteOne({hnid: post_id}, function(err) {
+        Post.deleteOne({hnid: id}, function(err) {
             if (err) {
                 callback(err);
             }
@@ -65,6 +64,7 @@ var delete_Post_by_id = function(db, id, callback) {
         });
     });
 }
+
 var add_to_Post_finalTimeAsTop = function(db, postId, callback) {
     db.once('open', function(){
         logger.log('info', 'MAIN: db is open: add_to_Post_finalTimeAsTop' );
@@ -113,7 +113,6 @@ var add_to_Post_initTimeAsTop = function(db, post_id, callback){
         });
     });
 }
-// END Testing Waters
 
 const sleep = require('util').promisify(setTimeout);
 
@@ -393,5 +392,8 @@ function add_to_Post_initTimeAsTop(db_url, post_id){
 
 */
 
-main();
-
+module.exports.is_Post_in_hndb = is_Post_in_hndb;
+module.exports.add_new_Post = add_new_Post;
+module.exports.delete_Post_by_id = delete_Post_by_id;
+module.exports.add_to_Post_finalTimeAsTop = add_to_Post_finalTimeAsTop;
+module.exports.add_to_Post_initTimeAsTop = add_to_Post_initTimeAsTop;
