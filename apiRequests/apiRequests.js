@@ -227,7 +227,7 @@ var start = async function() {
                       });
                   }
                   else {    // Didnt file post in db
-                      add_to_Post_initTimeAsTop(db, topPostId, function(err) {
+                      add_to_Post_initTimeAsTop(db, topPostId[0], function(err) {
                           if (err) {
                               logger.log('error', err + "Found Same post but" +
                                   "Could not update initTime to db");

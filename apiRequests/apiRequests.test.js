@@ -95,12 +95,6 @@ test('Add Final Time to a post.', done => {
     apiRequest.add_to_Post_finalTimeAsTop(db, post1.id, callback);
 });
 
-test('Calculating running top_post time', () => {
-    var one = apiRequest.top_post_cumulative_time_duration(db, post1.id, callback);
-        expect(one).toBe(10);
-});
-
-/*
 test('Delete a new post', done => {
     function callback(err) {
         expect(err).toBe(null);
@@ -109,4 +103,9 @@ test('Delete a new post', done => {
     }
     apiRequest.delete_Post_by_id(db, post1.id, callback);
 });
-*/
+
+test('Calculating running top_post time', () => {
+    var one = apiRequest.top_post_cumulative_time_duration(db, post1.id, callback);
+        expect(one).toBe(10);
+});
+
