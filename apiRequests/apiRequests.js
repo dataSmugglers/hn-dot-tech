@@ -140,10 +140,10 @@ const logger = new (winston.Logger) ({
     }),
   ]
 });
+var lastTopPost = 0;
 
 
-
-var start = async function() {
+var start = function() {
     var goOn = true;
 
     logger.log('info', 'MAIN: main has started');
@@ -151,103 +151,121 @@ var start = async function() {
     // Before loop begins, get the top post
     var topPostId = getHackerNewsApiRequest_TopPosts();
     var firstTopPost = getHackerNewsApiRequest_TopPostInfo(topPostId[0]);
-    var lastTopPost = topPostId[0];
+    lastTopPost = topPostId[0];
 
     mongoose.connect(url, { keepAlive: 120 });
     var db = mongoose.connection;
     db.on('error', console.error.bind(console, 'connection error:'));
-
     is_Post_in_hndb(db, topPostId[0], function (err, post) {
         if (err) { // Didnt find post in db
             logger.log('info', "Didnt find post in DB");
             logger.log('info', "Starting process to add post to db");
             add_new_Post(db, firstTopPost, function(err){
-                    if (err) logger.log('error', 'Could not add new post ERR1');
-                    logger.log('info', "Successfully Added post: "+topPostId[0]);
+                    if (err) {
+                        logger.log('error', 'Could not add new post ERR1');
+                        mongoose.connection.close();
+                    }
+                    else {
+                        logger.log('info', "Successfully Added post: " + topPostId[0]);
+                        mongoose.connection.close();
+                    }
                 });
         }
         else { // Found post in db
             // Delete and add again with new initTime
             logger.log('info', 'Found Post with same id');
             delete_Post_by_id(db, topPostId[0], function (err) {
-                if (err) logger.log('error', 'Could not delete post: ' + topPostId[0]);
-                logger.log('info', 'Successfully deleted post (id: ' + post_id +
-                    ') from db');
+                if (err) {
+                    logger.log('error', 'Could not delete post: ' + topPostId[0]);
+                }
+                else {
+                    logger.log('info', 'Successfully deleted post (id: ' + topPostId[0] +
+                        ') from db');
+                }
             });
             add_new_Post(db, firstTopPost, function (err) {
                 if (err) logger.log('error', 'Could not add new post ERR2');
                 logger.log('info', "Successfully Added post: " + topPostId[0]);
+                mongoose.connection.close();
             });
         }
     });
 
-    while(goOn) {
-
-
-          var topPostId = getHackerNewsApiRequest_TopPosts();
-          var firstTopPost = getHackerNewsApiRequest_TopPostInfo(topPostId[0]);
-          logger.log('info', 'Current top post id: ' + firstTopPost.id +
-              "\nCurrent top post title: " + firstTopPost.title );
-
-          // Make sure that this post is the same top post
-          if ( topPostId[0] === lastTopPost ) {
-              logger.log('info',
-                  "The current top post received == the last known top post");
-          }
-
-          // There has been a 'top post' change
-          else {
-              // Enter the now-old top post's end time if not a new db
-              logger.log('info', 'DETECTED top post change!');
-              logger.log('info', 'Searching for old top post');
-
-
-              add_to_Post_finalTimeAsTop(db, lastTopPost, function(err, post) {
-                  if (err) {
-                      logger.log('error',
-                          'Unsuccessfully added final_time to last top post');
-                  }
-                  else {
-                      logger.log('info', 'UPDATED: Successfully added' +
-                          'Final_time to last top post');
-                  }
-              });
-
-              is_Post_in_hndb(db, topPostId[0], function(err) {
-                  if (err) {
-                      add_new_Post(db, firstTopPost, function(err) {
-                          if (err) {
-                              logger.log("error", "Could not add new TOP POST" +
-                                  "to db");
-                          }
-                          else {
-                              logger.log("info", "Successfully added new TOP " +
-                                  "POST to db");
-                          }
-                      });
-                  }
-                  else {    // Didnt file post in db
-                      add_to_Post_initTimeAsTop(db, topPostId[0], function(err) {
-                          if (err) {
-                              logger.log('error', err + "Found Same post but" +
-                                  "Could not update initTime to db");
-                          }
-                          else {
-                              logger.log('info', "Found Same post and" +
-                                  "updated initTime to db");
-
-                          }
-                      });
-
-                  }
-              });
-
-              lastTopPost = topPostId[0];
-          }
-      logger.log('info', 'Sleeping for 60 seconds');
-      await sleep(60000);
-    }
+    setInterval(main, 60000);
 }
+var main = function (arg) {
+
+    mongoose.connect(url, { keepAlive: 120 });
+    var db = mongoose.connection;
+    db.on('error', console.error.bind(console, 'connection error:'));
+
+    var topPostId = getHackerNewsApiRequest_TopPosts();
+    var firstTopPost = getHackerNewsApiRequest_TopPostInfo(topPostId[0]);
+
+
+    logger.log('info', 'Current top post id: ' + firstTopPost.id +
+        "\nCurrent top post title: " + firstTopPost.title );
+
+    // Make sure that this post is the same top post
+    if ( topPostId[0] === lastTopPost ) {
+        logger.log('info',
+            "The current top post received == the last known top post");
+    }
+
+    // There has been a 'top post' change
+    else {
+        // Enter the now-old top post's end time if not a new db
+        logger.log('info', 'DETECTED top post change!');
+        logger.log('info', 'Searching for old top post');
+
+
+        add_to_Post_finalTimeAsTop(db, lastTopPost, function(err, post) {
+            if (err) {
+                logger.log('error',
+                    'Unsuccessfully added final_time to last top post');
+            }
+            else {
+                logger.log('info', 'UPDATED: Successfully added' +
+                    'Final_time to last top post');
+            }
+        });
+
+        is_Post_in_hndb(db, topPostId[0], function(err, post) {
+            // Not in db
+            if (err) {
+                logger.log('error', 'Problem searching db for post');
+            }
+            if (post) { // Did find post in db already
+                add_to_Post_initTimeAsTop(db, topPostId[0], function(err) {
+                    if (err) {
+                        logger.log('error', err + "Found Same post but" +
+                            "Could not update initTime to db");
+                    }
+                    else {
+                        logger.log('info', "Found Same post and" +
+                            "updated initTime to db");
+
+                    }
+                });
+            }
+            else {    // Didnt find post in db
+                add_new_Post(db, firstTopPost, function(err) {
+                    if (err) {
+                        logger.log("error", "Could not add new TOP POST" +
+                            "to db");
+                    }
+                    else {
+                        logger.log("info", "Successfully added new TOP " +
+                            "POST to db");
+                    }
+                });
+
+            }
+        });
+
+        lastTopPost = topPostId[0];
+    }
+};
 
 function connectToDatabase(url) {
     mongoose.connect(url, { keepAlive: 120 });
