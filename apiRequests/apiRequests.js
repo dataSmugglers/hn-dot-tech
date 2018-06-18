@@ -114,14 +114,12 @@ var update_Post_score = function(db, top_post, callback){
 
     db.once('open', function(){
         logger.log('info', 'MAIN: db is open: update_Post_score');
-        Post.findOneAndUpdate({hnid: top_post.id}, {score: top_post.score},
+        Post.findOneAndUpdate({hnid: top_post.id}, {votes: top_post.score},
             function(err, doc) {
                 if (err) {
-                    logger.log('error', "Could not update the Post score");
                     return callback(err, null);
                 }
                 else {
-                    logger.log('error', "Successfully updated the Post score");
                     return callback(null, doc);
                 }
             }
@@ -229,6 +227,14 @@ var main = function (arg) {
     if ( topPostId[0] === lastTopPost ) {
         logger.log('info',
             "The current top post received == the last known top post");
+        update_Post_score(db, firstTopPost, function(err) {
+            if (err) {
+                logger.log('error', 'ERR, couldnt update score');
+            }
+            else {
+                logger.log('info', 'Successfully updated score');
+            }
+        });
     }
 
     // There has been a 'top post' change
@@ -246,6 +252,14 @@ var main = function (arg) {
             else {
                 logger.log('info', 'UPDATED: Successfully added' +
                     'Final_time to last top post');
+            }
+        });
+        update_Post_score(db, firstTopPost, function(err) {
+            if (err) {
+                logger.log('error', 'ERR, couldnt update score after finalTime updt');
+            }
+            else {
+                logger.log('info', 'Successfully updated score after finalTime updt');
             }
         });
 
