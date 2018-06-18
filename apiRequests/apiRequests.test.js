@@ -95,6 +95,15 @@ test('Add Final Time to a post.', done => {
     apiRequest.add_to_Post_finalTimeAsTop(db, post1.id, callback);
 });
 
+test('Update score to a post.', done => {
+    function callback(err, doc) {
+        logger.log('info', 'TEST: Update_Score starting')
+        expect(err).toBe(null);
+        done();
+    }
+    apiRequest.update_Post_score(db, post1, callback);
+});
+
 test('Delete a new post', done => {
     function callback(err) {
         expect(err).toBe(null);

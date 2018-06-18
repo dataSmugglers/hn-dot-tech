@@ -17,7 +17,7 @@ var Post = require('../server/models/Post');
 var mongoose = require('mongoose');
 var hn = require('hackernews-api');
 var url = "mongodb://localhost:27017/hndb";
-
+// Change something else
 /*
 * @param db     a valid mongoose db connection
 * @param postId a hackernews post id
@@ -107,6 +107,25 @@ var add_to_Post_initTimeAsTop = function(db, post_id, callback){
                 return callback(null, doc);
             }
         });
+    });
+};
+
+var update_Post_score = function(db, top_post, callback){
+
+    db.once('open', function(){
+        logger.log('info', 'MAIN: db is open: update_Post_score');
+        Post.findOneAndUpdate({hnid: top_post.id}, {score: top_post.score},
+            function(err, doc) {
+                if (err) {
+                    logger.log('error', "Could not update the Post score");
+                    return callback(err, null);
+                }
+                else {
+                    logger.log('error', "Successfully updated the Post score");
+                    return callback(null, doc);
+                }
+            }
+        );
     });
 };
 
@@ -291,4 +310,5 @@ module.exports.add_new_Post = add_new_Post;
 module.exports.delete_Post_by_id = delete_Post_by_id;
 module.exports.add_to_Post_finalTimeAsTop = add_to_Post_finalTimeAsTop;
 module.exports.add_to_Post_initTimeAsTop = add_to_Post_initTimeAsTop;
+module.exports.update_Post_score = update_Post_score;
 module.exports.top_post_cumulative_time_duration = top_post_cumulative_time_duration ;
