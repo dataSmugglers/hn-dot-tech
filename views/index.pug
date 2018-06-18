@@ -16,8 +16,7 @@ block content
                         - var url = title[title.length-1].url
                         a(href=""+url target="__blank")
                             h5.center #{title[title.length-1].title}
-                        p.light
-                            | We did most of the heavy lifting for you to provide a default stylings that incorporate our custom components. Additionally, we refined animations and transitions to provide a smoother experience for developers.
+                        p.light.center Votes: #{title[title.length-1].votes}
                 .col.s12.m4
                     .icon-block
                         h2.center.light-blue-text
@@ -25,8 +24,7 @@ block content
                         - var url = title[title.length-2].url
                         a(href=""+url target="__blank")
                             h5.center #{title[title.length-2].title}
-                        p.light
-                            | By utilizing elements and principles of Material Design, we were able to create a framework that incorporates components and animations that provide more feedback to users. Additionally, a single underlying responsive system across all platforms allow for a more unified user experience.
+                        p.light.center Votes: #{title[title.length-2].votes}
                 .col.s12.m4
                     .icon-block
                         h2.center.light-blue-text
@@ -34,8 +32,12 @@ block content
                         - var url = title[title.length-3].url
                         a(href=""+url target="__blank")
                             h5.center #{title[title.length-3].title}
-                        p.light
-                            | We have provided detailed documentation as well as specific code examples to help new users get started. We are also always open to feedback and can answer any questions a user may have about Materialize.o
+                        p.light.center Votes: #{title[title.length-3].votes}
+            .row
+                .col.s12
+                    .center
+                        a(href="#") [More]
+
     .container
         .section
             hr
@@ -50,8 +52,7 @@ block content
                         - var url = title[title.length-4].url
                         a(href=""+url target="__blank")
                             h5.center #{title[title.length-4].title}
-                        p.light
-                            | We did most of the heavy lifting for you to provide a default stylings that incorporate our custom components. Additionally, we refined animations and transitions to provide a smoother experience for developers.
+                        p.light.center Votes: #{title[title.length-4].votes}
                 .col.s12.m4
                     .icon-block
                         h2.center.light-blue-text
@@ -59,8 +60,7 @@ block content
                         - var url = title[title.length-5].url
                         a(href=""+url target="__blank")
                             h5.center #{title[title.length-5].title}
-                        p.light
-                            | By utilizing elements and principles of Material Design, we were able to create a framework that incorporates components and animations that provide more feedback to users. Additionally, a single underlying responsive system across all platforms allow for a more unified user experience.
+                        p.light.center Votes: #{title[title.length-5].votes}
                 .col.s12.m4
                     .icon-block
                         h2.center.light-blue-text
@@ -68,8 +68,11 @@ block content
                         - var url = title[title.length-6].url
                         a(href=""+url target="__blank")
                             h5.center #{title[title.length-6].title}
-                        p.light
-                            | We have provided detailed documentation as well as specific code examples to help new users get started. We are also always open to feedback and can answer any questions a user may have about Materialize.o
+                        p.light.center Votes: #{title[title.length-6].votes}
+            .row
+                .col.s12
+                    .center
+                        a(href="#") [More]
     .container
         .section
             hr
