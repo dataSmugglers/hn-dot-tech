@@ -11,10 +11,20 @@ function home (req, res) {
     mongoose.Promise = global.Promise;
     mongoose.connect(url);
 
+    const currentDate = new Date();
+    const startOfcurrentDate = new Date(currentDate.getFullYear(),
+        currentDate.getMonth(), currentDate.getDate(), 0, 0, 0);
     var myData = new Post();
-    Post.find({}, function (err, posts) {
+    Post.find({}, function (err, all_posts) {
       if (err) return res.status(400).send(err);
-      res.render('index', {title: posts});
+      Post.find({initTimeAsTop: {
+          $gte: startOfcurrentDate,
+          $lte: currentDate} },
+          function(err, today_posts){
+            if (err) return res.status(400).send(err);
+            res.render('index', {title: all_posts, today_posts: today_posts});
+          }
+      );
     });
 }
 
