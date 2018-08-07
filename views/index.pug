@@ -1,0 +1,133 @@
+extends layout
+
+block content
+
+    .container
+        .section
+            hr
+            h5(class="header center black-test") Today's Top Posts
+            hr
+            // Icon Section
+            .row
+                .col.s12.m4
+                    .icon-block
+                        h2.center.light-blue-text
+                            i.medium.material-icons looks_one
+                        - var url = title[title.length-1].url
+                        a(href=""+url target="__blank")
+                            h5.center #{title[title.length-1].title}
+                        p.light.center Votes: #{title[title.length-1].votes}
+                .col.s12.m4
+                    .icon-block
+                        h2.center.light-blue-text
+                            i.medium.material-icons looks_two
+                        - var url = title[title.length-2].url
+                        a(href=""+url target="__blank")
+                            h5.center #{title[title.length-2].title}
+                        p.light.center Votes: #{title[title.length-2].votes}
+                .col.s12.m4
+                    .icon-block
+                        h2.center.light-blue-text
+                            i.medium.material-icons looks_3
+                        - var url = title[title.length-3].url
+                        a(href=""+url target="__blank")
+                            h5.center #{title[title.length-3].title}
+                        p.light.center Votes: #{title[title.length-3].votes}
+            .row
+                .col.s12
+                    .center
+                        a(href="#") [More]
+
+    .container
+        .section
+            hr
+            h5(class="header center black-test") This Week's Top Posts
+            hr
+            // Icon Section
+            .row
+                .col.s12.m4
+                    .icon-block
+                        h2.center.light-blue-text
+                            i.medium.material-icons looks_one
+                        - var url = title[title.length-4].url
+                        a(href=""+url target="__blank")
+                            h5.center #{title[title.length-4].title}
+                        p.light.center Votes: #{title[title.length-4].votes}
+                .col.s12.m4
+                    .icon-block
+                        h2.center.light-blue-text
+                            i.medium.material-icons looks_two
+                        - var url = title[title.length-5].url
+                        a(href=""+url target="__blank")
+                            h5.center #{title[title.length-5].title}
+                        p.light.center Votes: #{title[title.length-5].votes}
+                .col.s12.m4
+                    .icon-block
+                        h2.center.light-blue-text
+                            i.medium.material-icons looks_3
+                        - var url = title[title.length-6].url
+                        a(href=""+url target="__blank")
+                            h5.center #{title[title.length-6].title}
+                        p.light.center Votes: #{title[title.length-6].votes}
+            .row
+                .col.s12
+                    .center
+                        a(href="#") [More]
+    .container
+        .section
+            hr
+            h5(class="header center black-test") All Top Posts
+            hr
+            // Icon Section
+            .row
+                .col.s12
+                    .icon-block
+                        h2.center.light-blue.darken-3
+                            i.medium.material-icons reorder
+                        each item in title
+                            p
+                                a(href=item.url target="_blank")= item.title
+                        hr
+        br
+        br
+    footer.page-footer.orange
+        .container
+            .row
+                .col.l6.s12
+                    h5.white-text Team: Data Smugglers
+                    p.grey-text.text-lighten-4
+                        | We are a team of recent-college-grads working on this project.
+                .col.l3.s12
+                    h5.white-text Other Projects
+                    ul
+                        li
+                            a.white-text(href='https://kittenheads.com/') Kittenheads
+                        li
+                            a.white-text(href='https://unix.xyz') Sal's [Under Construction] Blog
+                        li
+                            a.white-text(href='#!') Link 3
+                        li
+                            a.white-text(href='#!') Link 4
+                .col.l3.s12
+                    h5.white-text Connect
+                    ul
+                        li
+                            a.white-text(href='https://twitter.com/Sal_Camara') @Sal_Camara
+                        li
+                            a.white-text(href='#!') Link 2
+                        li
+                            a.white-text(href='#!') Link 3
+                        li
+                            a.white-text(href='#!') Link 4
+        .footer-copyright
+            .container
+                | Made by
+                a.orange-text.text-lighten-3(href='http://materializecss.com') Materialize
+
+
+    p hello
+    p #{title}
+    p #{today_posts}
+
+
+    script(type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/js/materialize.min.js")
