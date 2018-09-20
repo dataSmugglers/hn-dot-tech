@@ -7,6 +7,7 @@
 var app = require('../app');
 var debug = require('debug')('hn-dot-tech:server');
 var http = require('http');
+var mongoose = require('mongoose');
 
 /**
  * Get port from environment and store in Express.
@@ -14,6 +15,13 @@ var http = require('http');
 
 var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
+
+var mongodb_url = process.env.MONGODB ? process.env.MONGODB : "mongodb://localhost:27017/greetingsDB";
+
+mongoose.connect(mongodb_url, {keepAlive: 120, useNewUrlParser: true });
+mongoose.Promise = global.Promise;
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
 
 /**
  * Create HTTP server.

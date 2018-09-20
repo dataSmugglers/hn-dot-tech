@@ -5,8 +5,6 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var lessMiddleware = require('less-middleware');
 var logger = require('morgan');
-var mongo = require('mongodb');
-var mongoose = require('mongoose');
 
 //TODO: need to add: morgan, cookie-parser, less-middleware, http-errors
 
@@ -47,18 +45,6 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-// database setup
-var MongoClient = require('mongodb').MongoClient;
-var url = "mongodb://localhost:27017/hndb";
-
-MongoClient.connect(url, {useNewUrlParser: true}, function(err, db) {
-  if (err) throw err;
-  console.log("Database created!");
-  db.close();
-});
-
-// mongoose orm setup
-mongoose.connect('mongodb://localhost:27017/hndb');
 
 module.exports = app;
 
