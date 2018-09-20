@@ -10,7 +10,7 @@ sudo apt upgrade -y
 
 # install softwarez
 sudo apt install -y build-essential gcc g++ make git tmux wget libcurl3 mongodb-org-server nodejs mongodb-org
-npm install -g grunt jshint pm2
+sudo npm install -g grunt jshint pm2
 sudo systemctl start mongod
 sudo systemctl enable mongod
 

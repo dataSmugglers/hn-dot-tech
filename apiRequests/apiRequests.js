@@ -17,7 +17,7 @@ var Post = require('../server/models/Post');
 var mongoose = require('mongoose');
 var hn = require('hackernews-api');
 var url = "mongodb://localhost:27017/hndb";
-
+// Change something else
 /*
 * @param db     a valid mongoose db connection
 * @param postId a hackernews post id
@@ -110,8 +110,57 @@ var add_to_Post_initTimeAsTop = function(db, post_id, callback){
     });
 };
 
-var top_post_cumulative_time_duration = function (db, post_id, callback) {
-    return;
+var update_Post_score = function(db, top_post, callback){
+
+    db.once('open', function(){
+        logger.log('info', 'MAIN: db is open: update_Post_score');
+        Post.findOneAndUpdate({hnid: top_post.id}, {votes: top_post.score},
+            function(err, doc) {
+                if (err) {
+                    return callback(err, null);
+                }
+                else {
+                    return callback(null, doc);
+                }
+            }
+        );
+    });
+};
+
+var add_to_Post_durationAsTop = function (db, post_id, callback) {
+    db.once('open', function(){
+        logger.log('info', 'MAIN: db is open: add_to_Post_durationAsTop' );
+        Post.findOne({hnid: post_id}, function(err, post) {
+            if (err) {
+                logger.log('error', "Could not find post [duration]. Err:" + err);
+                return callback(err, null);
+            }
+            else{
+                logger.log('info', 'found post.. Post id: '+post.hnid);
+                var duration = 0;
+                for (var i = 0; i < post.finalTimeAsTop.length; i++){
+                    duration = duration + (post.finalTimeAsTop[i] - post.initTimeAsTop[i]);
+                }
+
+                Post.findOneAndUpdate({hnid: post_id}, {$set: {durationAsTop: duration}},
+                    function(err, doc) {
+                        if (err) {
+                            logger.log('error', 'Could not update Duration. Err:'+err);
+                            return callback(err, null);
+                        }
+                        else {
+                            logger.log('info', 'Found Post and was able to insert dur');
+                            return callback(null, doc);
+                        }
+
+                    }
+                );
+                logger.log('info', 'Found Post with same id, updating duration');
+                logger.log('info', " Duration Calculated: "+ duration);
+
+            }
+        });
+    });
 }
 const sleep = require('util').promisify(setTimeout);
 
@@ -196,10 +245,11 @@ var start = function() {
 var main = function (arg) {
 
     mongoose.connect(url, { keepAlive: 120 });
+
     var db = mongoose.connection;
     db.on('error', console.error.bind(console, 'connection error:'));
-
     var topPostId = getHackerNewsApiRequest_TopPosts();
+    logger.log('debug', 'spot 0')
     var firstTopPost = getHackerNewsApiRequest_TopPostInfo(topPostId[0]);
 
 
@@ -210,6 +260,14 @@ var main = function (arg) {
     if ( topPostId[0] === lastTopPost ) {
         logger.log('info',
             "The current top post received == the last known top post");
+        update_Post_score(db, firstTopPost, function(err) {
+            if (err) {
+                logger.log('error', 'ERR, couldnt update score');
+            }
+            else {
+                logger.log('info', 'Successfully updated score');
+            }
+        });
     }
 
     // There has been a 'top post' change
@@ -227,6 +285,22 @@ var main = function (arg) {
             else {
                 logger.log('info', 'UPDATED: Successfully added' +
                     'Final_time to last top post');
+            }
+        });
+        add_to_Post_durationAsTop(db, lastTopPost, function(err, post) {
+            if (err) {
+                logger.log('error', 'Could not update durationAsTop. Err: '+ err);
+            }
+            else {
+                logger.log('info', 'Updated: durationAsTop');
+            }
+        });
+        update_Post_score(db, firstTopPost, function(err) {
+            if (err) {
+                logger.log('error', 'ERR, couldnt update score after finalTime updt');
+            }
+            else {
+                logger.log('info', 'Successfully updated score after finalTime updt');
             }
         });
 
@@ -291,4 +365,5 @@ module.exports.add_new_Post = add_new_Post;
 module.exports.delete_Post_by_id = delete_Post_by_id;
 module.exports.add_to_Post_finalTimeAsTop = add_to_Post_finalTimeAsTop;
 module.exports.add_to_Post_initTimeAsTop = add_to_Post_initTimeAsTop;
-module.exports.top_post_cumulative_time_duration = top_post_cumulative_time_duration ;
+module.exports.update_Post_score = update_Post_score;
+module.exports.add_to_Post_durationAsTop = add_to_Post_durationAsTop ;

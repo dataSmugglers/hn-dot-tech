@@ -1,9 +1,46 @@
 doctype html
 html
-  head
-    title HackerNews.tech
-    link(rel='stylesheet', href='/stylesheets/style.css')
-    link(rel='stylesheet', href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous")
+    head
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        script(async src="https://www.googletagmanager.com/gtag/js?id=UA-121100177-1")
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date())
+          gtag('config', 'UA-121100177-1')
+        </script>
 
-  body
-    block content
+
+        meta(charset='utf-8')
+        meta(http-equiv='x-ua-compatible' content='ie=edge')
+        meta(name='viewport' content='width=device-width, initial-scale=1.0')
+        title HackerNews.tech
+        link(href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet")
+        link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/css/materialize.min.css")
+
+    body
+        nav(class="light-blue darken-3" role="navigation")
+            div(class="nav-wrapper container")
+                a(id="logo-container" href="#" class="brand-logo") HN Tech
+                ul(class="right hide-on-med-and-down")
+                    li
+                        a(href="#") Top Posts
+                    li
+                        a(href="#") Archives
+                    li
+                        a(href="#") About
+                    li
+                        a(href="#") Contact
+                ul(id="nav-mobile" class="sidenav")
+                    li
+                        a(href="#") Navbar Link
+                a(href="#" data-target="nav-mobile" class="sidenav-trigger")
+                    i(class="material-icons") menu
+
+        div(class="container")
+            div(class='row')
+                div(class='cos s12.m12 center')
+                    h1(class="header center orange-text") >Hacker News
+                    h5(class="header center") All time "top posts" from:
+                        a(href="https://news.ycombinator.com/" target="__blank") _hackernews
+        block content

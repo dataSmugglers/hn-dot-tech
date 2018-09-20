@@ -104,15 +104,26 @@ module.exports = function (grunt) {
             files: [ 'public/js/**/*.js'],
             tasks: ['jshint:client']
           },
+          api: {
+              files: ['apiRequests/**/*.js'],
+              tasks: ['run:commands']
+          },
           lint_server: {
-            files: ['app.js', 'bin/www', 'server/**/*.js'
-            ],
+            files: ['app.js', 'bin/www', 'server/**/*.js'],
             tasks: ['jshint:server']
           },
           rebuild: {
             files: ['Gruntfile.js'],
             tasks: ['jshint:build', 'build:debug'],
           }
+        },
+        run: {
+            commands: {
+                options: {
+                    wait: true
+                },
+                exec: 'npm test'
+            }
         },
         copy: {
           js_debug: {
@@ -139,6 +150,7 @@ module.exports = function (grunt) {
           }
         }
     });
+    grunt.loadNpmTasks('grunt-run');
     grunt.loadNpmTasks('grunt-bump');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-clean');
